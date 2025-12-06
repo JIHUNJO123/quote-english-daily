@@ -12,6 +12,7 @@ class QuoteService {
   List<Quote> _quotes = [];
   List<Quote> _favorites = [];
   final Random _random = Random();
+  String? _selectedCategory; // 선택된 카테고리 필터
 
   Future<void> loadQuotes() async {
     try {
@@ -19,17 +20,47 @@ class QuoteService {
       final List<dynamic> jsonList = json.decode(jsonString);
       _quotes = jsonList.map((json) => Quote.fromJson(json)).toList();
       await _loadFavorites();
+      await _loadSelectedCategory();
     } catch (e) {
       print('Error loading quotes: $e');
       _quotes = [];
     }
   }
 
+  // 선택된 카테고리 저장/로드
+  Future<void> _loadSelectedCategory() async {
+    final prefs = await SharedPreferences.getInstance();
+    _selectedCategory = prefs.getString('selected_category');
+  }
+
+  Future<void> setSelectedCategory(String? category) async {
+    _selectedCategory = category;
+    final prefs = await SharedPreferences.getInstance();
+    if (category == null) {
+      await prefs.remove('selected_category');
+    } else {
+      await prefs.setString('selected_category', category);
+    }
+  }
+
+  String? get selectedCategory => _selectedCategory;
+
+  // 필터링된 명언 목록
+  List<Quote> get _filteredQuotes {
+    if (_selectedCategory == null || _selectedCategory!.isEmpty) {
+      return _quotes;
+    }
+    return _quotes.where((q) => 
+      q.category.toLowerCase() == _selectedCategory!.toLowerCase()
+    ).toList();
+  }
+
   List<Quote> get allQuotes => _quotes;
   List<Quote> get favorites => _favorites;
 
   Quote getRandomQuote() {
-    if (_quotes.isEmpty) {
+    final quotes = _filteredQuotes;
+    if (quotes.isEmpty) {
       return Quote(
         id: 0,
         text: 'No quotes available',
@@ -38,11 +69,12 @@ class QuoteService {
         tags: [],
       );
     }
-    return _quotes[_random.nextInt(_quotes.length)];
+    return quotes[_random.nextInt(quotes.length)];
   }
 
   Quote getDailyQuote() {
-    if (_quotes.isEmpty) {
+    final quotes = _filteredQuotes;
+    if (quotes.isEmpty) {
       return Quote(
         id: 0,
         text: 'No quotes available',
@@ -55,8 +87,8 @@ class QuoteService {
     // 날짜 기반으로 동일한 명언 반환
     final now = DateTime.now();
     final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
-    final index = (dayOfYear + now.year) % _quotes.length;
-    return _quotes[index];
+    final index = (dayOfYear + now.year) % quotes.length;
+    return quotes[index];
   }
 
   List<Quote> getQuotesByCategory(String category) {

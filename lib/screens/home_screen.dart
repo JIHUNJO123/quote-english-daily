@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   bool _showDailyQuote = true;
   int _quoteViewCount = 0;
+  String? _selectedCategory;
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadQuotes() async {
     await _quoteService.loadQuotes();
     setState(() {
+      _selectedCategory = _quoteService.selectedCategory;
       _currentQuote = _quoteService.getDailyQuote();
       _isLoading = false;
     });
@@ -58,11 +60,90 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _shareQuote() {
+  Future<void> _showCategoryFilter(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final categories = _quoteService.getCategories();
+    
+    await showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.get('filter_category'),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.get('filter_category_desc'),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // 전체 선택 (필터 해제)
+                ChoiceChip(
+                  label: Text(l10n.get('all_categories')),
+                  selected: _selectedCategory == null,
+                  onSelected: (selected) async {
+                    await _quoteService.setSelectedCategory(null);
+                    setState(() {
+                      _selectedCategory = null;
+                      _currentQuote = _quoteService.getDailyQuote();
+                      _showDailyQuote = true;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                // 각 카테고리
+                ...categories.map((category) => ChoiceChip(
+                  label: Text(l10n.getCategory(category)),
+                  selected: _selectedCategory?.toLowerCase() == category.toLowerCase(),
+                  onSelected: (selected) async {
+                    await _quoteService.setSelectedCategory(category);
+                    setState(() {
+                      _selectedCategory = category;
+                      _currentQuote = _quoteService.getDailyQuote();
+                      _showDailyQuote = true;
+                    });
+                    Navigator.pop(context);
+                  },
+                )),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _shareQuote() async {
     if (_currentQuote != null) {
-      Share.share(
-        '"${_currentQuote!.text}"\n\n- ${_currentQuote!.author}\n\n#DailyQuotes',
-      );
+      try {
+        await Share.share(
+          '"${_currentQuote!.text}"\n\n- ${_currentQuote!.author}\n\n#QuoteEnglishDaily',
+          subject: 'Quote English Daily',
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unable to share')),
+          );
+        }
+      }
     }
   }
 
@@ -100,31 +181,70 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _showDailyQuote ? l10n.get('daily_quote') : l10n.get('random_quote'),
+                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Text(
+                                      _formatDate(DateTime.now(), l10n),
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+                                      ),
+                                    ),
+                                    if (_selectedCategory != null) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          l10n.getCategory(_selectedCategory!),
+                                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                _showDailyQuote ? l10n.get('daily_quote') : l10n.get('random_quote'),
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              // 필터 버튼
+                              IconButton(
+                                onPressed: () => _showCategoryFilter(context),
+                                icon: Icon(
+                                  _selectedCategory != null ? Icons.filter_alt : Icons.filter_alt_outlined,
+                                  color: _selectedCategory != null 
+                                      ? Theme.of(context).colorScheme.primary 
+                                      : null,
                                 ),
+                                tooltip: l10n.get('filter_category'),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _formatDate(DateTime.now(), l10n),
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+                              if (!_showDailyQuote)
+                                IconButton(
+                                  onPressed: _showDailyQuoteAgain,
+                                  icon: const Icon(Icons.today),
+                                  tooltip: l10n.get('view_daily_quote'),
                                 ),
-                              ),
                             ],
                           ),
-                          if (!_showDailyQuote)
-                            IconButton(
-                              onPressed: _showDailyQuoteAgain,
-                              icon: const Icon(Icons.today),
-                              tooltip: l10n.get('view_daily_quote'),
-                            ),
                         ],
                       ),
                     ),

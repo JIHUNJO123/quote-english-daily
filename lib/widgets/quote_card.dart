@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/quote.dart';
 import '../l10n/app_localizations.dart';
 import '../services/translation_service.dart';
@@ -110,64 +111,76 @@ class _QuoteCardState extends State<QuoteCard> {
               
               if (!widget.compact) const SizedBox(height: 16),
               
-              // 영어 원문
-              Text(
-                widget.quote.text,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontSize: widget.compact ? 16 : 20,
-                  fontStyle: FontStyle.italic,
-                  height: 1.6,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              
-              // 번역 표시
-              if (showTranslateButton && _showTranslation && _translation != null) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
+              // 스크롤 가능한 명언 영역
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 영어 원문
+                      Text(
+                        widget.quote.text,
+                        style: GoogleFonts.merriweather(
+                          fontSize: widget.compact ? 16 : 20,
+                          fontStyle: FontStyle.italic,
+                          height: 1.6,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      
+                      // 번역 표시
+                      if (showTranslateButton && _showTranslation && _translation != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _translation!,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: widget.compact ? 14 : 16,
+                              height: 1.5,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                      
+                      if (_isTranslating) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(l10n.get('translating')),
+                          ],
+                        ),
+                      ],
+                      
+                      SizedBox(height: widget.compact ? 16 : 24),
+                      
+                      // 저자
+                      Text(
+                        widget.quote.author,
+                        style: GoogleFonts.lora(
+                          fontSize: widget.compact ? 14 : 16,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    _translation!,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontSize: widget.compact ? 14 : 16,
-                      height: 1.5,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
                 ),
-              ],
-              
-              if (_isTranslating) ...[
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(l10n.get('translating')),
-                  ],
-                ),
-              ],
-              
-              SizedBox(height: widget.compact ? 16 : 24),
-              
-              // 저자
-              Text(
-                widget.quote.author,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                textAlign: TextAlign.center,
               ),
               
               SizedBox(height: widget.compact ? 12 : 20),

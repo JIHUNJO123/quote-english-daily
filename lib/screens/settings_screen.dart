@@ -255,6 +255,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ListTile(
                           leading: const Icon(Icons.restore),
                           title: Text(l10n.get('restore_purchases')),
+                          subtitle: Text(l10n.get('restore_purchases_desc')),
                           onTap: () => _restorePurchases(context),
                         ),
                         
