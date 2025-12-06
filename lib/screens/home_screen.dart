@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:share_plus/share_plus.dart';
 import '../models/quote.dart';
 import '../services/quote_service.dart';
 import '../services/ad_service.dart';
@@ -130,23 +129,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _shareQuote() async {
-    if (_currentQuote != null) {
-      try {
-        await Share.share(
-          '"${_currentQuote!.text}"\n\n- ${_currentQuote!.author}\n\n#QuoteEnglishDaily',
-          subject: 'Quote English Daily',
-        );
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Unable to share')),
-          );
-        }
-      }
-    }
-  }
-
   Future<void> _toggleFavorite() async {
     if (_currentQuote != null) {
       await _quoteService.toggleFavorite(_currentQuote!);
@@ -258,7 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             quote: _currentQuote!,
                             isFavorite: _quoteService.isFavorite(_currentQuote!),
                             onFavoritePressed: _toggleFavorite,
-                            onSharePressed: _shareQuote,
                           ),
                         ),
                       ),

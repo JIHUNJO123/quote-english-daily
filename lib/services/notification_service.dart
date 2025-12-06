@@ -54,6 +54,7 @@ class NotificationService {
   Future<void> scheduleDailyNotification({
     required int hour,
     required int minute,
+    bool useEnglish = true,
   }) async {
     await _notifications.cancelAll();
 
@@ -69,13 +70,18 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    const androidDetails = AndroidNotificationDetails(
+    // 알림 제목과 내용 설정
+    final title = useEnglish ? "Today's Quote 💬" : '오늘의 명언 💬';
+    final quoteText = quote.text.length > 100 ? '${quote.text.substring(0, 100)}...' : quote.text;
+    final body = '"$quoteText" - ${quote.author}';
+
+    final androidDetails = AndroidNotificationDetails(
       'daily_quote_channel',
-      '오늘의 명언',
-      channelDescription: '매일 명언을 알려드립니다',
+      useEnglish ? 'Daily Quote' : '오늘의 명언',
+      channelDescription: useEnglish ? 'Get daily inspiring quotes' : '매일 명언을 알려드립니다',
       importance: Importance.high,
       priority: Priority.high,
-      styleInformation: BigTextStyleInformation(''),
+      styleInformation: const BigTextStyleInformation(''),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -84,15 +90,15 @@ class NotificationService {
       presentSound: true,
     );
 
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
 
     await _notifications.zonedSchedule(
       0,
-      '오늘의 명언 💬',
-      '"${quote.text.length > 100 ? '${quote.text.substring(0, 100)}...' : quote.text}" - ${quote.author}',
+      title,
+      body,
       tz.TZDateTime.from(scheduledDate, tz.local),
       details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -105,6 +111,7 @@ class NotificationService {
     await prefs.setBool('notifications_enabled', true);
     await prefs.setInt('notification_hour', hour);
     await prefs.setInt('notification_minute', minute);
+    await prefs.setBool('notification_use_english', useEnglish);
   }
 
   Future<void> cancelAllNotifications() async {
@@ -120,6 +127,7 @@ class NotificationService {
       'enabled': prefs.getBool('notifications_enabled') ?? false,
       'hour': prefs.getInt('notification_hour') ?? 8,
       'minute': prefs.getInt('notification_minute') ?? 0,
+      'useEnglish': prefs.getBool('notification_use_english') ?? true,
     };
   }
 }

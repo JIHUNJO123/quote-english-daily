@@ -9,7 +9,6 @@ class QuoteCard extends StatefulWidget {
   final Quote quote;
   final bool isFavorite;
   final VoidCallback onFavoritePressed;
-  final VoidCallback onSharePressed;
   final bool compact;
 
   const QuoteCard({
@@ -17,7 +16,6 @@ class QuoteCard extends StatefulWidget {
     required this.quote,
     required this.isFavorite,
     required this.onFavoritePressed,
-    required this.onSharePressed,
     this.compact = false,
   });
 
@@ -234,11 +232,6 @@ class _QuoteCardState extends State<QuoteCard> {
                     onPressed: () => _copyToClipboard(context),
                     icon: const Icon(Icons.copy),
                     tooltip: l10n.get('copy'),
-                  ),
-                  IconButton(
-                    onPressed: widget.onSharePressed,
-                    icon: const Icon(Icons.share),
-                    tooltip: l10n.get('share'),
                   ),
                 ],
               ),

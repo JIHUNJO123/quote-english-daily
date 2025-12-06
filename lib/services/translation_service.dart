@@ -57,9 +57,29 @@ class TranslationService {
   // 무료 번역 API (LibreTranslate 또는 MyMemory)
   Future<String?> _translateWithFreeAPI(String text, String targetLang) async {
     try {
+      // 텍스트가 500자 초과하면 잘라서 번역
+      String textToTranslate = text;
+      bool isTruncated = false;
+      if (text.length > 450) {
+        // 문장 단위로 자르기 시도
+        final sentences = text.split(RegExp(r'(?<=[.!?])\s+'));
+        textToTranslate = '';
+        for (final sentence in sentences) {
+          if ((textToTranslate + sentence).length < 450) {
+            textToTranslate += (textToTranslate.isEmpty ? '' : ' ') + sentence;
+          } else {
+            break;
+          }
+        }
+        if (textToTranslate.isEmpty) {
+          textToTranslate = text.substring(0, 450);
+        }
+        isTruncated = true;
+      }
+
       // MyMemory API (무료, 일일 제한 있음)
       final url = Uri.parse(
-        'https://api.mymemory.translated.net/get?q=${Uri.encodeComponent(text)}&langpair=en|$targetLang'
+        'https://api.mymemory.translated.net/get?q=${Uri.encodeComponent(textToTranslate)}&langpair=en|$targetLang'
       );
       
       final response = await http.get(url).timeout(
@@ -72,9 +92,9 @@ class TranslationService {
         
         // 번역 품질 체크
         if (translation != null && 
-            translation != text && 
+            translation != textToTranslate && 
             !translation.toString().toUpperCase().contains('MYMEMORY WARNING')) {
-          return translation;
+          return isTruncated ? '$translation...' : translation;
         }
       }
     } catch (e) {

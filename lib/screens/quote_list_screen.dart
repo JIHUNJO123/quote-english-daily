@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import '../models/quote.dart';
 import '../services/quote_service.dart';
 import '../widgets/quote_card.dart';
@@ -26,12 +25,6 @@ class _QuoteListScreenState extends State<QuoteListScreen> {
     setState(() {});
   }
 
-  void _shareQuote(Quote quote) {
-    Share.share(
-      '"${quote.text}"\n\n- ${quote.author}\n\n#오늘의명언',
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +43,6 @@ class _QuoteListScreenState extends State<QuoteListScreen> {
               quote: quote,
               isFavorite: _quoteService.isFavorite(quote),
               onFavoritePressed: () => _toggleFavorite(quote),
-              onSharePressed: () => _shareQuote(quote),
               compact: true,
             ),
           );

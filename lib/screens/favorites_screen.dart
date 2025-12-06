@@ -5,7 +5,6 @@ import '../services/quote_service.dart';
 import '../widgets/quote_card.dart';
 import '../widgets/banner_ad_widget.dart';
 import '../l10n/app_localizations.dart';
-import 'package:share_plus/share_plus.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -34,12 +33,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Future<void> _toggleFavorite(Quote quote) async {
     await _quoteService.toggleFavorite(quote);
     setState(() {});
-  }
-
-  void _shareQuote(Quote quote) {
-    Share.share(
-      '"${quote.text}"\n\n- ${quote.author}\n\n#DailyQuotes',
-    );
   }
 
   @override
@@ -95,7 +88,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                 quote: quote,
                                 isFavorite: true,
                                 onFavoritePressed: () => _toggleFavorite(quote),
-                                onSharePressed: () => _shareQuote(quote),
                                 compact: true,
                               ),
                             );

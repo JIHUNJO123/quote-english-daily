@@ -19,6 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final AdService _adService = AdService();
   bool _notificationsEnabled = false;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 8, minute: 0);
+  bool _notificationUseEnglish = true;
   bool _isLoading = true;
   bool _isPurchasing = false;
 
@@ -51,6 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         hour: settings['hour'] ?? 8,
         minute: settings['minute'] ?? 0,
       );
+      _notificationUseEnglish = settings['useEnglish'] ?? true;
       _isLoading = false;
     });
   }
@@ -72,6 +74,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await _notificationService.scheduleDailyNotification(
         hour: _notificationTime.hour,
         minute: _notificationTime.minute,
+        useEnglish: _notificationUseEnglish,
       );
     } else {
       await _notificationService.cancelAllNotifications();
@@ -88,6 +91,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _toggleNotificationLanguage(bool useEnglish) async {
+    setState(() {
+      _notificationUseEnglish = useEnglish;
+    });
+    
+    if (_notificationsEnabled) {
+      await _notificationService.scheduleDailyNotification(
+        hour: _notificationTime.hour,
+        minute: _notificationTime.minute,
+        useEnglish: useEnglish,
+      );
+    }
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.get('notification_language')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<bool>(
+              title: const Text('English'),
+              subtitle: Text(l10n.get('notification_english_desc')),
+              value: true,
+              groupValue: _notificationUseEnglish,
+              onChanged: (value) {
+                _toggleNotificationLanguage(true);
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<bool>(
+              title: Text(l10n.get('local_language')),
+              subtitle: Text(l10n.get('notification_local_desc')),
+              value: false,
+              groupValue: _notificationUseEnglish,
+              onChanged: (value) {
+                _toggleNotificationLanguage(false);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -207,6 +260,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           trailing: const Icon(Icons.chevron_right),
                           enabled: _notificationsEnabled,
                           onTap: _notificationsEnabled ? () => _selectTime(context) : null,
+                        ),
+                        
+                        ListTile(
+                          leading: const Icon(Icons.language),
+                          title: Text(l10n.get('notification_language')),
+                          subtitle: Text(_notificationUseEnglish ? 'English' : l10n.get('local_language')),
+                          trailing: const Icon(Icons.chevron_right),
+                          enabled: _notificationsEnabled,
+                          onTap: _notificationsEnabled ? () => _showLanguageDialog(context) : null,
                         ),
                       ],
                       
