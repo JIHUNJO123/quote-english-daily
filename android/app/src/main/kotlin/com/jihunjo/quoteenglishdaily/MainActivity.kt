@@ -1,4 +1,4 @@
-package com.example.daily_quotes
+package com.jihunjo.quoteenglishdaily
 
 import io.flutter.embedding.android.FlutterActivity
 
