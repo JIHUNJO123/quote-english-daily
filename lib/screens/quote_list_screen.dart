@@ -33,12 +33,12 @@ class _QuoteListScreenState extends State<QuoteListScreen> {
         centerTitle: true,
       ),
       body: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         itemCount: widget.quotes.length,
         itemBuilder: (context, index) {
           final quote = widget.quotes[index];
           return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 10),
             child: QuoteCard(
               quote: quote,
               isFavorite: _quoteService.isFavorite(quote),

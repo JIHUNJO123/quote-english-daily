@@ -87,28 +87,18 @@ class _QuoteCardState extends State<QuoteCard> {
     final showTranslateButton = langCode != 'en';
 
     return Card(
-      elevation: widget.compact ? 2 : 8,
+      elevation: widget.compact ? 2 : 6,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         onLongPress: () => _copyToClipboard(context),
         child: Container(
-          padding: EdgeInsets.all(widget.compact ? 20 : 28),
+          padding: EdgeInsets.all(widget.compact ? 14 : 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 따옴표 아이콘
-              if (!widget.compact)
-                Icon(
-                  Icons.format_quote,
-                  size: 40,
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                ),
-              
-              if (!widget.compact) const SizedBox(height: 16),
-              
               // 스크롤 가능한 명언 영역
               Flexible(
                 child: SingleChildScrollView(
@@ -119,9 +109,9 @@ class _QuoteCardState extends State<QuoteCard> {
                       Text(
                         widget.quote.text,
                         style: GoogleFonts.merriweather(
-                          fontSize: widget.compact ? 16 : 20,
+                          fontSize: widget.compact ? 14 : 17,
                           fontStyle: FontStyle.italic,
-                          height: 1.6,
+                          height: 1.5,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                         textAlign: TextAlign.center,
@@ -129,18 +119,18 @@ class _QuoteCardState extends State<QuoteCard> {
                       
                       // 번역 표시
                       if (showTranslateButton && _showTranslation && _translation != null) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             _translation!,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: widget.compact ? 14 : 16,
-                              height: 1.5,
+                              fontSize: widget.compact ? 12 : 14,
+                              height: 1.4,
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                             textAlign: TextAlign.center,
@@ -164,13 +154,13 @@ class _QuoteCardState extends State<QuoteCard> {
                         ),
                       ],
                       
-                      SizedBox(height: widget.compact ? 16 : 24),
+                      SizedBox(height: widget.compact ? 10 : 16),
                       
                       // 저자
                       Text(
                         widget.quote.author,
                         style: GoogleFonts.lora(
-                          fontSize: widget.compact ? 14 : 16,
+                          fontSize: widget.compact ? 12 : 14,
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -181,25 +171,26 @@ class _QuoteCardState extends State<QuoteCard> {
                 ),
               ),
               
-              SizedBox(height: widget.compact ? 12 : 20),
+              SizedBox(height: widget.compact ? 8 : 14),
               
               // 카테고리 태그
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   l10n.getCategory(widget.quote.category).toUpperCase(),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               
-              SizedBox(height: widget.compact ? 12 : 20),
+              SizedBox(height: widget.compact ? 8 : 14),
               
               // 액션 버튼들
               Row(

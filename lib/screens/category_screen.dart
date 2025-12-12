@@ -72,13 +72,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
                     child: GridView.builder(
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 1.3,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.5,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
                       ),
                       itemCount: _categories.length,
                       itemBuilder: (context, index) {
@@ -154,35 +154,43 @@ class _CategoryCard extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Icon(
                   icon,
-                  size: 32,
+                  size: 26,
                   color: Colors.white,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        displayName,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Text(
-                      '$quoteCount $quotesCountLabel',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$quoteCount $quotesCountLabel',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.visible,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
