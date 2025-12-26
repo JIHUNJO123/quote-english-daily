@@ -276,11 +276,20 @@ class _QuoteCardState extends State<QuoteCard> {
                   // 번역 버튼 (영어가 아닌 경우만)
                   if (showTranslateButton)
                     IconButton(
-                      onPressed: () {
-                        if (!_showTranslation && _translation == null) {
-                          _loadTranslation(langCode);
+                      onPressed: () async {
+                        if (_showTranslation) {
+                          // 이미 보여주고 있으면 숨기기
+                          setState(() => _showTranslation = false);
+                        } else {
+                          // 번역이 없으면 먼저 로드
+                          if (_translation == null) {
+                            await _loadTranslation(langCode);
+                          }
+                          // 번역이 있으면 표시
+                          if (_translation != null && mounted) {
+                            setState(() => _showTranslation = true);
+                          }
                         }
-                        setState(() => _showTranslation = !_showTranslation);
                       },
                       icon: Icon(
                         _showTranslation

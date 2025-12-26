@@ -23,61 +23,120 @@ class QuoteService {
   static const String categoryFamous = '_FAMOUS_';
   static const String categoryShort = '_SHORT_';
 
-  // 유명인 리스트
+  // 유명인 리스트 (확장)
   static const List<String> _famousPeople = [
-    'Einstein',
-    'Gandhi',
-    'Steve Jobs',
-    'Mark Twain',
-    'Oscar Wilde',
-    'Aristotle',
-    'Plato',
-    'Buddha',
-    'Confucius',
-    'Shakespeare',
-    'Martin Luther King',
-    'Lincoln',
-    'Churchill',
-    'Nelson Mandela',
-    'Dalai Lama',
-    'Mother Teresa',
-    'Oprah',
-    'Walt Disney',
-    'Henry Ford',
-    'Thomas Edison',
-    'Benjamin Franklin',
-    'John F. Kennedy',
-    'Napoleon',
-    'Socrates',
-    'Voltaire',
-    'Nietzsche',
-    'Hemingway',
-    'Maya Angelou',
-    'Paulo Coelho',
-    'Rumi',
-    'Lao Tzu',
-    'Sun Tzu',
-    'Warren Buffett',
-    'Elon Musk',
-    'Bill Gates',
-    'Michael Jordan',
-    'Muhammad Ali',
-    'Bruce Lee',
-    'Kobe Bryant',
-    'Marilyn Monroe',
-    'Audrey Hepburn',
-    'Albert Camus',
-    'Leo Tolstoy',
-    'Sigmund Freud',
-    'Carl Jung',
+    // 과학자/발명가
+    'Einstein', 'Albert Einstein', 'Newton', 'Isaac Newton', 'Darwin',
+    'Charles Darwin',
+    'Galileo', 'Copernicus', 'Tesla', 'Nikola Tesla', 'Thomas Edison',
     'Stephen Hawking',
-    'Helen Keller',
-    'Anne Frank',
-    'Eleanor Roosevelt',
-    'Rosa Parks',
-    'Albert Einstein',
-    'Mahatma Gandhi',
-    'Winston Churchill',
+    'Marie Curie', 'Feynman', 'Carl Sagan', 'Neil deGrasse', 'Pasteur',
+    'Edison',
+
+    // 철학자/사상가
+    'Aristotle', 'Plato', 'Socrates', 'Confucius', 'Buddha', 'Lao Tzu',
+    'Sun Tzu',
+    'Nietzsche', 'Voltaire', 'Descartes', 'Kant', 'Hegel', 'Marx', 'Rousseau',
+    'Seneca', 'Marcus Aurelius', 'Epictetus', 'Emerson', 'Thoreau',
+    'Kierkegaard',
+    'Schopenhauer', 'Spinoza', 'Locke', 'Hume', 'Bacon', 'Pascal', 'Montaigne',
+
+    // 작가/시인
+    'Shakespeare', 'Mark Twain', 'Oscar Wilde', 'Hemingway', 'Ernest Hemingway',
+    'Maya Angelou', 'Paulo Coelho', 'Rumi', 'Tolstoy', 'Leo Tolstoy',
+    'Dostoevsky',
+    'Dickens', 'Charles Dickens', 'Jane Austen', 'Virginia Woolf',
+    'Edgar Allan Poe',
+    'Victor Hugo', 'Goethe', 'Homer', 'Dante', 'Cervantes', 'Kafka', 'Orwell',
+    'George Orwell', 'Aldous Huxley', 'F. Scott Fitzgerald', 'Fitzgerald',
+    'Faulkner',
+    'Steinbeck', 'Chekhov', 'Ibsen', 'Tennessee Williams', 'Arthur Miller',
+    'Harper Lee', 'Toni Morrison', 'Gabriel García Márquez', 'Borges', 'Neruda',
+    'Walt Whitman', 'Robert Frost', 'T.S. Eliot', 'Wordsworth', 'Keats',
+    'Shelley',
+    'Byron', 'William Blake', 'Yeats', 'Emily Dickinson', 'Sylvia Plath',
+    'Langston Hughes',
+    'Dr. Seuss', 'C.S. Lewis', 'J.R.R. Tolkien', 'Roald Dahl',
+    'Agatha Christie',
+    'Stephen King', 'J.K. Rowling', 'Dan Brown', 'Haruki Murakami',
+
+    // 정치인/지도자
+    'Gandhi', 'Mahatma Gandhi', 'Martin Luther King', 'Lincoln',
+    'Abraham Lincoln',
+    'Churchill', 'Winston Churchill', 'Nelson Mandela', 'Mandela',
+    'John F. Kennedy',
+    'Kennedy', 'JFK', 'Napoleon', 'Theodore Roosevelt', 'Franklin D. Roosevelt',
+    'FDR',
+    'Washington', 'George Washington', 'Jefferson', 'Thomas Jefferson',
+    'Reagan',
+    'Obama', 'Trump', 'Biden', 'Clinton', 'Margaret Thatcher',
+    'Queen Elizabeth',
+    'Princess Diana', 'Alexander the Great', 'Caesar', 'Julius Caesar',
+    'Cleopatra',
+    'Che Guevara', 'Malcolm X', 'Frederick Douglass', 'Harriet Tubman',
+
+    // 종교/영적 지도자
+    'Dalai Lama', 'Mother Teresa', 'Pope Francis', 'Pope John Paul',
+    'Billy Graham',
+    'Thich Nhat Hanh', 'Deepak Chopra', 'Eckhart Tolle', 'Osho', 'Krishnamurti',
+
+    // 비즈니스/기업가
+    'Steve Jobs', 'Bill Gates', 'Warren Buffett', 'Elon Musk', 'Jeff Bezos',
+    'Henry Ford', 'Walt Disney', 'Ray Kroc', 'Richard Branson',
+    'Mark Zuckerberg',
+    'Jack Ma', 'Oprah', 'Oprah Winfrey', 'Dale Carnegie', 'Napoleon Hill',
+    'Tony Robbins', 'Jim Rohn', 'Zig Ziglar', 'Brian Tracy', 'Robert Kiyosaki',
+
+    // 스포츠
+    'Michael Jordan', 'Muhammad Ali', 'Bruce Lee', 'Kobe Bryant',
+    'LeBron James',
+    'Tiger Woods', 'Serena Williams', 'Roger Federer', 'Messi', 'Ronaldo',
+    'Pelé', 'Maradona', 'Vince Lombardi', 'Wayne Gretzky', 'Babe Ruth',
+    'Michael Phelps', 'Usain Bolt', 'Tom Brady',
+
+    // 엔터테인먼트/예술
+    'Marilyn Monroe', 'Audrey Hepburn', 'Charlie Chaplin', 'Alfred Hitchcock',
+    'Steven Spielberg', 'Quentin Tarantino', 'Stanley Kubrick',
+    'Francis Ford Coppola',
+    'Walt Disney', 'Jim Henson', 'Robin Williams', 'Morgan Freeman',
+    'Tom Hanks',
+    'Meryl Streep', 'Denzel Washington', 'Clint Eastwood', 'Robert De Niro',
+    'Leonardo DiCaprio', 'Brad Pitt', 'Angelina Jolie', 'Johnny Depp',
+    'John Lennon', 'Paul McCartney', 'Bob Dylan', 'Elvis', 'Elvis Presley',
+    'Michael Jackson', 'Prince', 'David Bowie', 'Madonna', 'Whitney Houston',
+    'Bob Marley', 'Freddie Mercury', 'Jimi Hendrix', 'Frank Sinatra', 'Beyoncé',
+    'Jay-Z', 'Kanye West', 'Taylor Swift', 'Lady Gaga', 'Rihanna',
+    'Picasso', 'Van Gogh', 'Da Vinci', 'Leonardo da Vinci', 'Michelangelo',
+    'Monet', 'Rembrandt', 'Salvador Dalí', 'Andy Warhol', 'Frida Kahlo',
+
+    // 심리학자/학자
+    'Sigmund Freud', 'Freud', 'Carl Jung', 'Jung', 'Carl Rogers', 'Maslow',
+    'B.F. Skinner', 'Pavlov', 'Noam Chomsky', 'Joseph Campbell',
+    'Jordan Peterson',
+
+    // 여성 리더/활동가
+    'Helen Keller', 'Anne Frank', 'Eleanor Roosevelt', 'Rosa Parks',
+    'Susan B. Anthony',
+    'Gloria Steinem', 'Ruth Bader Ginsburg', 'Malala', 'Greta Thunberg',
+    'Michelle Obama',
+    'Hillary Clinton', 'Angela Merkel', 'Coco Chanel', 'Amelia Earhart',
+
+    // 철학자/심리학자 추가
+    'Albert Camus', 'Jean-Paul Sartre', 'Simone de Beauvoir', 'Hannah Arendt',
+    'Bertrand Russell', 'Ludwig Wittgenstein', 'William James', 'John Dewey',
+
+    // 기타 유명인
+    'Benjamin Franklin', 'Nikola Tesla', 'Wright Brothers', 'Alan Turing',
+    'Machiavelli', 'Nostradamus', 'Rasputin', 'Florence Nightingale',
+    'Alexander Graham Bell', 'Gutenberg', 'Marco Polo', 'Christopher Columbus',
+    'Vasco da Gama', 'Ferdinand Magellan', 'Neil Armstrong', 'Buzz Aldrin',
+    'Yuri Gagarin', 'Sally Ride',
+
+    // 현대 사상가/작가
+    'Simon Sinek', 'Malcolm Gladwell', 'Seth Godin', 'Tim Ferriss',
+    'Gary Vaynerchuk',
+    'Brené Brown', 'Adam Grant', 'Daniel Pink', 'Angela Duckworth',
+    'James Clear',
   ];
 
   int get rewardedQuotes => _rewardedQuotes;
@@ -163,6 +222,13 @@ class QuoteService {
   // 유명인 명언인지 확인
   bool _isFamousQuote(Quote quote) {
     final authorLower = quote.author.toLowerCase();
+    return _famousPeople
+        .any((person) => authorLower.contains(person.toLowerCase()));
+  }
+
+  // 외부에서 사용 가능한 유명인 확인 메서드
+  bool isFamousPerson(String author) {
+    final authorLower = author.toLowerCase();
     return _famousPeople
         .any((person) => authorLower.contains(person.toLowerCase()));
   }

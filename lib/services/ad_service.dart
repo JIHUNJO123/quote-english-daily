@@ -144,8 +144,7 @@ class AdService {
     if (_rewardedAd == null) {
       await loadRewardedAd();
       if (_rewardedAd == null) {
-        // 광고 로드 실패 시에도 보상 제공 (사용자 경험)
-        onRewarded(5, 'quotes');
+        // 광고 로드 실패 - 사용자에게 다시 시도 요청
         return;
       }
     }
@@ -162,10 +161,7 @@ class AdService {
         ad.dispose();
         _rewardedAd = null;
         loadRewardedAd();
-        // 실패 시에도 작은 보상 제공
-        if (_onRewarded != null) {
-          _onRewarded!(3, 'quotes');
-        }
+        // 광고 표시 실패 - 보상 없음
       },
     );
 

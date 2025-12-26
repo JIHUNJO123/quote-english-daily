@@ -77,19 +77,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _showRewardedAd() async {
+  // _showRewardedAd와 _unlockQuotes를 통일 - 자정까지 무료로
+  Future<void> _showRewardedAdForUnlock() async {
     final l10n = AppLocalizations.of(context);
 
     await _adService.showRewardedAd(
       onRewarded: (rewardAmount, rewardType) async {
-        await _quoteService.addRewardedQuotes(rewardAmount);
+        await _adService.unlockUntilMidnight();
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n
-                  .get('reward_received')
-                  .replaceAll('{amount}', rewardAmount.toString())),
+              content: Text(l10n.get('unlocked_until_midnight')),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),
@@ -645,50 +644,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
-                          // 보상 명언 수 표시
-                          if (_quoteService.rewardedQuotes > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.stars,
-                                    size: 16,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    l10n
-                                        .get('rewarded_quotes_available')
-                                        .replaceAll(
-                                            '{count}',
-                                            _quoteService.rewardedQuotes
-                                                .toString()),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium
-                                        ?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
                           // 새 명언 버튼
                           SizedBox(
                             width: double.infinity,
@@ -703,16 +658,18 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
 
-                          // 보상형 광고 버튼
-                          if (!kIsWeb && _adService.shouldShowAds)
+                          // 보상형 광고 버튼 - 자정까지 무료 잠금 해제
+                          if (!kIsWeb &&
+                              _adService.shouldShowAds &&
+                              !_adService.isUnlocked)
                             Padding(
                               padding: const EdgeInsets.only(top: 12),
                               child: SizedBox(
                                 width: double.infinity,
                                 child: OutlinedButton.icon(
-                                  onPressed: _showRewardedAd,
-                                  icon: const Icon(Icons.play_circle_outline),
-                                  label: Text(l10n.get('watch_ad_for_reward')),
+                                  onPressed: _showRewardedAdForUnlock,
+                                  icon: const Icon(Icons.lock_open),
+                                  label: Text(l10n.get('watch_ad_unlock')),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 14),
@@ -722,6 +679,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                       width: 2,
                                     ),
                                   ),
+                                ),
+                              ),
+                            ),
+
+                          // 잠금 해제 상태 표시
+                          if (_adService.isUnlocked && !_adService.isPremium)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.green),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle,
+                                      color: Colors.green,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      l10n.get('unlocked_until_midnight'),
+                                      style: const TextStyle(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

@@ -187,6 +187,7 @@ class AppLocalizations {
       // Unlock
       'locked_quote': 'Locked Quote',
       'watch_ad_unlock': 'Watch ad to unlock all quotes until midnight',
+      'watch_ad_to_unlock': 'Tap to watch ad and unlock',
       'unlocked_until_midnight': 'Free until midnight!',
       'tap_to_unlock': 'Tap to unlock',
     },
@@ -282,6 +283,7 @@ class AppLocalizations {
       // Unlock
       'locked_quote': '잠긴 명언',
       'watch_ad_unlock': '광고를 보고 자정까지 모든 명언 무료로 보기',
+      'watch_ad_to_unlock': '탭하여 광고 보고 잠금 해제',
       'unlocked_until_midnight': '자정까지 무료!',
       'tap_to_unlock': '탭하여 잠금 해제',
     },
@@ -363,6 +365,7 @@ class AppLocalizations {
       // Unlock
       'locked_quote': 'ロックされた名言',
       'watch_ad_unlock': '広告を見て深夜まで全ての名言を無料で',
+      'watch_ad_to_unlock': 'タップして広告を見て解除',
       'unlocked_until_midnight': '深夜まで無料！',
       'tap_to_unlock': 'タップして解除',
     },
@@ -444,6 +447,7 @@ class AppLocalizations {
       // Unlock
       'locked_quote': '已锁定的名言',
       'watch_ad_unlock': '看广告免费解锁所有名言直到午夜',
+      'watch_ad_to_unlock': '点击观看广告解锁',
       'unlocked_until_midnight': '午夜前免费！',
       'tap_to_unlock': '点击解锁',
     },
