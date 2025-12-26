@@ -1,128 +1,81 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class TranslationService {
   static final TranslationService _instance = TranslationService._internal();
   factory TranslationService() => _instance;
   TranslationService._internal();
 
-  // 캐시된 번역 저장
-  final Map<String, Map<String, String>> _cache = {};
+  // 내장 번역 데이터 (quote_id -> translations)
+  static Map<int, Map<String, String>>? _embeddedTranslations;
+  static bool _isLoaded = false;
 
-  // 로컬 번역 캐시 로드
-  Future<void> loadCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    final cacheJson = prefs.getString('translation_cache');
-    if (cacheJson != null) {
-      final decoded = json.decode(cacheJson) as Map<String, dynamic>;
-      decoded.forEach((key, value) {
-        _cache[key] = Map<String, String>.from(value);
+  // 지원 언어 (주요 6개 언어 + 영어)
+  static const List<String> supportedLanguages = [
+    'en', // English (원본)
+    'ko', // 한국어
+    'ja', // 日本語
+    'zh', // 中文
+    'es', // Español
+    'fr', // Français
+    'pt', // Português
+  ];
+
+  // 번역 데이터 로드
+  Future<void> loadTranslations() async {
+    if (_isLoaded) return;
+
+    try {
+      final String jsonString = await rootBundle.loadString('assets/quotes_translations.json');
+      final Map<String, dynamic> jsonData = json.decode(jsonString);
+      
+      _embeddedTranslations = {};
+      jsonData.forEach((quoteIdStr, data) {
+        final quoteId = int.parse(quoteIdStr);
+        final translations = Map<String, String>.from(data['translations'] ?? {});
+        _embeddedTranslations![quoteId] = translations;
       });
+      
+      _isLoaded = true;
+      print('Loaded ${_embeddedTranslations!.length} quote translations');
+    } catch (e) {
+      print('Error loading translations: $e');
+      _embeddedTranslations = {};
+      _isLoaded = true;
     }
   }
 
-  // 캐시 저장
-  Future<void> _saveCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('translation_cache', json.encode(_cache));
-  }
-
-  // 번역 가져오기 (캐시 우선)
-  Future<String?> getTranslation(String text, String targetLang) async {
+  // 번역 가져오기 (quote_id와 텍스트로 검색)
+  Future<String?> getTranslation(String text, int? quoteId, String targetLang) async {
     // 영어면 번역 필요 없음
     if (targetLang == 'en') return null;
+    
+    // 지원하지 않는 언어면 null 반환
+    if (!supportedLanguages.contains(targetLang)) return null;
     
     // 빈 텍스트 체크
     if (text.trim().isEmpty) return null;
 
-    final cacheKey = '${text.hashCode}_$targetLang';
-    
-    // 캐시에서 확인
-    if (_cache.containsKey(cacheKey)) {
-      final cached = _cache[cacheKey]?['translation'];
-      if (cached != null && cached.isNotEmpty) {
-        return cached;
+    // 번역 데이터가 로드되지 않았으면 로드
+    if (!_isLoaded) {
+      await loadTranslations();
+    }
+
+    // quote_id로 번역 찾기 (가장 정확)
+    if (quoteId != null && _embeddedTranslations != null) {
+      final translations = _embeddedTranslations![quoteId];
+      if (translations != null && translations.containsKey(targetLang)) {
+        return translations[targetLang];
       }
     }
 
-    // 먼저 오프라인 번역 확인
-    final offline = getOfflineTranslation(text, targetLang);
-    if (offline != null) {
-      _cache[cacheKey] = {'translation': offline};
-      await _saveCache();
-      return offline;
-    }
-
-    // 실제 번역 API 호출 (여기서는 무료 API 사용)
-    try {
-      final translation = await _translateWithFreeAPI(text, targetLang);
-      if (translation != null && translation.isNotEmpty) {
-        _cache[cacheKey] = {'translation': translation};
-        await _saveCache();
-      }
-      return translation;
-    } catch (e) {
-      print('Translation error: $e');
-      return null;
-    }
-  }
-
-  // 무료 MyMemory API를 사용한 번역 (비용 없음)
-  Future<String?> _translateWithFreeAPI(String text, String targetLang) async {
-    try {
-      // MyMemory Translation API (무료, 일일 제한 있음)
-      final url = Uri.parse(
-        'https://api.mymemory.translated.net/get?q=${Uri.encodeComponent(text)}&langpair=en|$targetLang'
-      );
-      
-      final response = await http.get(url).timeout(
-        const Duration(seconds: 10),
-      );
-      
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final translation = data['responseData']?['translatedText']?.toString().trim();
-        
-        if (translation != null && 
-            translation.isNotEmpty &&
-            translation != text &&
-            !translation.toUpperCase().contains('MYMEMORY WARNING') &&
-            !translation.toLowerCase().contains('error')) {
-          return translation;
-        }
-      }
-    } catch (e) {
-      print('Translation API error: $e');
-    }
-    
+    // quote_id가 없거나 찾지 못한 경우 null 반환
+    // (quote_id를 사용하는 것이 가장 정확함)
     return null;
   }
 
-  // 미리 정의된 인기 명언 번역 (오프라인 지원)
-  static final Map<String, Map<String, String>> popularQuoteTranslations = {
-    'The only way to do great work is to love what you do.': {
-      'ko': '위대한 일을 하는 유일한 방법은 당신이 하는 일을 사랑하는 것이다.',
-      'ja': '偉大な仕事をする唯一の方法は、自分のしていることを愛することだ。',
-      'zh': '成就伟大事业的唯一方法就是热爱你所做的事情。',
-      'es': 'La única manera de hacer un gran trabajo es amar lo que haces.',
-    },
-    'Be the change you wish to see in the world.': {
-      'ko': '당신이 세상에서 보고 싶은 변화가 되어라.',
-      'ja': '世界で見たい変化に、あなた自身がなりなさい。',
-      'zh': '成为你希望在世界上看到的改变。',
-      'es': 'Sé el cambio que deseas ver en el mundo.',
-    },
-    'In the middle of difficulty lies opportunity.': {
-      'ko': '어려움 속에 기회가 있다.',
-      'ja': '困難の中にこそ、機会がある。',
-      'zh': '困难之中蕴含着机遇。',
-      'es': 'En medio de la dificultad yace la oportunidad.',
-    },
-  };
-
-  // 인기 명언에서 미리 저장된 번역 가져오기
-  String? getOfflineTranslation(String text, String targetLang) {
-    return popularQuoteTranslations[text]?[targetLang];
+  // 지원 언어인지 확인
+  static bool isLanguageSupported(String langCode) {
+    return supportedLanguages.contains(langCode);
   }
 }

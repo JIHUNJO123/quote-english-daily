@@ -511,47 +511,15 @@ class AppLocalizations {
   
   static List<String> get supportedLanguageCodes => _allLanguageCodes;
 
-  // 주요 사용자 언어 (약 30개)
+  // 주요 언어 6개 + 영어 (GPT-4o mini로 미리 번역된 언어)
   static const Map<String, String> _languageNames = {
-    // 동아시아
     'en': 'English',
     'ko': '한국어',
     'ja': '日本語',
     'zh': '中文',
-    
-    // 유럽 주요 언어
     'es': 'Español',
     'fr': 'Français',
-    'de': 'Deutsch',
-    'it': 'Italiano',
     'pt': 'Português',
-    'ru': 'Русский',
-    'nl': 'Nederlands',
-    'pl': 'Polski',
-    'uk': 'Українська',
-    'tr': 'Türkçe',
-    'el': 'Ελληνικά',
-    'cs': 'Čeština',
-    'sv': 'Svenska',
-    'ro': 'Română',
-    'hu': 'Magyar',
-    'fi': 'Suomi',
-    'da': 'Dansk',
-    'no': 'Norsk',
-    
-    // 남아시아/동남아시아
-    'hi': 'हिन्दी',
-    'th': 'ไทย',
-    'vi': 'Tiếng Việt',
-    'id': 'Bahasa Indonesia',
-    'ms': 'Bahasa Melayu',
-    'tl': 'Tagalog',
-    
-    // 중동
-    'ar': 'العربية',
-    'fa': 'فارسی',
-    'he': 'עברית',
-    'ur': 'اردو',
   };
 
   String get languageName {

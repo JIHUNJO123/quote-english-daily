@@ -19,13 +19,27 @@ A global quotes app that brings you daily inspiration in your language. Get thou
 - **SKU**: quotespace_ios_001
 - **IAP Product ID**: com.quotespace.app.removeads
 - **IAP Price**: $1.99
-- **GitHub**: https://github.com/JIHUNJO123/quotespace
+- **GitHub**: https://github.com/JIHUNJO123/quote-english-daily
 
 ## URLs
 
-- **Privacy Policy**: https://jihunjo123.github.io/quotespace/privacy-policy.html
-- **Marketing**: https://jihunjo123.github.io/quotespace/marketing.html
-- **Support**: https://jihunjo123.github.io/quotespace/support.html
+파일이 루트와 `docs/` 폴더 모두에 있습니다. GitHub Pages 설정에 따라 사용하세요.
+
+**GitHub Pages 설정 방법:**
+1. 저장소 Settings > Pages로 이동
+2. Source를 "Deploy from a branch" 선택
+3. Branch를 "main" 선택
+4. Folder를 "/ (root)" 또는 "/docs" 선택
+
+**URL (루트 폴더 사용 시):**
+- **Privacy Policy**: https://jihunjo123.github.io/quote-english-daily/privacy-policy.html
+- **Marketing**: https://jihunjo123.github.io/quote-english-daily/marketing.html
+- **Support**: https://jihunjo123.github.io/quote-english-daily/support.html
+
+**URL (docs 폴더 사용 시):**
+- **Privacy Policy**: https://jihunjo123.github.io/quote-english-daily/privacy-policy.html
+- **Marketing**: https://jihunjo123.github.io/quote-english-daily/marketing.html
+- **Support**: https://jihunjo123.github.io/quote-english-daily/support.html
 - **Contact**: jihun.jo@yahoo.com
 
 ## App Store Content

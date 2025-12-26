@@ -33,8 +33,8 @@ class _QuoteCardState extends State<QuoteCard> {
   @override
   void initState() {
     super.initState();
-    // TranslationService 캐시 로드
-    _translationService.loadCache();
+    // TranslationService 번역 데이터 로드
+    _translationService.loadTranslations();
   }
 
   @override
@@ -86,26 +86,26 @@ class _QuoteCardState extends State<QuoteCard> {
 
     setState(() => _isTranslating = true);
 
-    // 먼저 오프라인 번역 확인
-    final offline =
-        _translationService.getOfflineTranslation(widget.quote.text, langCode);
-    if (offline != null) {
+    // 내장 번역 데이터에서 찾기
+    final translation = await _translationService.getTranslation(
+      widget.quote.text,
+      widget.quote.id,
+      langCode,
+    );
+
+    if (translation != null) {
       setState(() {
-        _translation = offline;
+        _translation = translation;
         _isTranslating = false;
       });
       return;
     }
 
-    // 온라인 번역 시도
-    final translation =
-        await _translationService.getTranslation(widget.quote.text, langCode);
-    if (mounted) {
-      setState(() {
-        _translation = translation;
-        _isTranslating = false;
-      });
-    }
+    // 번역을 찾지 못한 경우
+    setState(() {
+      _translation = null;
+      _isTranslating = false;
+    });
   }
 
   @override
