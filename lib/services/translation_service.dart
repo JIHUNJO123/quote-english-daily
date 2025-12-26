@@ -68,115 +68,35 @@ class TranslationService {
     }
   }
 
-  // GPT-4o mini API를 사용한 번역
+  // 무료 MyMemory API를 사용한 번역 (비용 없음)
   Future<String?> _translateWithFreeAPI(String text, String targetLang) async {
     try {
-      return await _callOpenAIAPI(text, targetLang);
-    } catch (e) {
-      print('Translation error: $e');
-      return null;
-    }
-  }
-  
-  // OpenAI GPT-4o mini API 호출
-  Future<String?> _callOpenAIAPI(String text, String targetLang) async {
-    try {
-      // OpenAI API 키는 환경 변수에서 가져오거나 설정에서 로드
-      // TODO: 환경 변수나 설정 파일에서 API 키를 로드하도록 변경 필요
-      const apiKey = String.fromEnvironment('OPENAI_API_KEY', defaultValue: '');
-      if (apiKey.isEmpty) {
-        print('OpenAI API key not configured');
-        return null;
-      }
+      // MyMemory Translation API (무료, 일일 제한 있음)
+      final url = Uri.parse(
+        'https://api.mymemory.translated.net/get?q=${Uri.encodeComponent(text)}&langpair=en|$targetLang'
+      );
       
-      // 언어 이름 매핑
-      final languageName = _getLanguageName(targetLang);
-      
-      final url = Uri.parse('https://api.openai.com/v1/chat/completions');
-      
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: json.encode({
-          'model': 'gpt-4o-mini',
-          'messages': [
-            {
-              'role': 'system',
-              'content': 'You are a professional translator. Translate the given English quote to $languageName. Maintain the meaning, tone, and style of the original quote. Only return the translation, nothing else.',
-            },
-            {
-              'role': 'user',
-              'content': text,
-            },
-          ],
-          'temperature': 0.3,
-          'max_tokens': 500,
-        }),
-      ).timeout(
-        const Duration(seconds: 30),
+      final response = await http.get(url).timeout(
+        const Duration(seconds: 10),
       );
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final translation = data['choices']?[0]?['message']?['content']?.toString().trim();
+        final translation = data['responseData']?['translatedText']?.toString().trim();
         
         if (translation != null && 
             translation.isNotEmpty &&
             translation != text &&
-            !translation.toLowerCase().contains('error') &&
-            !translation.toLowerCase().contains('sorry')) {
+            !translation.toUpperCase().contains('MYMEMORY WARNING') &&
+            !translation.toLowerCase().contains('error')) {
           return translation;
         }
-      } else {
-        print('OpenAI API error: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('OpenAI API error: $e');
+      print('Translation API error: $e');
     }
     
     return null;
-  }
-
-  // 언어 코드를 언어 이름으로 변환
-  String _getLanguageName(String langCode) {
-    const Map<String, String> languageNames = {
-      'ko': 'Korean',
-      'ja': 'Japanese',
-      'zh': 'Chinese (Simplified)',
-      'es': 'Spanish',
-      'fr': 'French',
-      'de': 'German',
-      'it': 'Italian',
-      'pt': 'Portuguese',
-      'ru': 'Russian',
-      'nl': 'Dutch',
-      'pl': 'Polish',
-      'uk': 'Ukrainian',
-      'tr': 'Turkish',
-      'el': 'Greek',
-      'cs': 'Czech',
-      'sv': 'Swedish',
-      'ro': 'Romanian',
-      'hu': 'Hungarian',
-      'fi': 'Finnish',
-      'da': 'Danish',
-      'no': 'Norwegian',
-      'hi': 'Hindi',
-      'th': 'Thai',
-      'vi': 'Vietnamese',
-      'id': 'Indonesian',
-      'ms': 'Malay',
-      'tl': 'Tagalog',
-      'ar': 'Arabic',
-      'fa': 'Persian',
-      'he': 'Hebrew',
-      'ur': 'Urdu',
-    };
-    
-    return languageNames[langCode] ?? langCode.toUpperCase();
   }
 
   // 미리 정의된 인기 명언 번역 (오프라인 지원)
