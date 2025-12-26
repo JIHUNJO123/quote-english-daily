@@ -32,18 +32,32 @@ class TranslationService {
   Future<String?> getTranslation(String text, String targetLang) async {
     // 영어면 번역 필요 없음
     if (targetLang == 'en') return null;
+    
+    // 빈 텍스트 체크
+    if (text.trim().isEmpty) return null;
 
     final cacheKey = '${text.hashCode}_$targetLang';
     
     // 캐시에서 확인
     if (_cache.containsKey(cacheKey)) {
-      return _cache[cacheKey]?['translation'];
+      final cached = _cache[cacheKey]?['translation'];
+      if (cached != null && cached.isNotEmpty) {
+        return cached;
+      }
+    }
+
+    // 먼저 오프라인 번역 확인
+    final offline = getOfflineTranslation(text, targetLang);
+    if (offline != null) {
+      _cache[cacheKey] = {'translation': offline};
+      await _saveCache();
+      return offline;
     }
 
     // 실제 번역 API 호출 (여기서는 무료 API 사용)
     try {
       final translation = await _translateWithFreeAPI(text, targetLang);
-      if (translation != null) {
+      if (translation != null && translation.isNotEmpty) {
         _cache[cacheKey] = {'translation': translation};
         await _saveCache();
       }
@@ -54,85 +68,115 @@ class TranslationService {
     }
   }
 
-  // 무료 번역 API (LibreTranslate 또는 MyMemory)
+  // GPT-4o mini API를 사용한 번역
   Future<String?> _translateWithFreeAPI(String text, String targetLang) async {
     try {
-      // 텍스트가 450자 이하면 바로 번역
-      if (text.length <= 450) {
-        return await _callMyMemoryAPI(text, targetLang);
-      }
-      
-      // 450자 초과하면 문장 단위로 나눠서 각각 번역 후 합치기
-      final sentences = text.split(RegExp(r'(?<=[.!?])\s+'));
-      List<String> chunks = [];
-      String currentChunk = '';
-      
-      // 문장들을 450자 이하 청크로 묶기
-      for (final sentence in sentences) {
-        if (currentChunk.isEmpty) {
-          currentChunk = sentence;
-        } else if ((currentChunk + ' ' + sentence).length <= 450) {
-          currentChunk += ' ' + sentence;
-        } else {
-          chunks.add(currentChunk);
-          currentChunk = sentence;
-        }
-      }
-      if (currentChunk.isNotEmpty) {
-        chunks.add(currentChunk);
-      }
-      
-      // 각 청크를 번역
-      List<String> translatedChunks = [];
-      for (final chunk in chunks) {
-        final translated = await _callMyMemoryAPI(chunk, targetLang);
-        if (translated != null) {
-          translatedChunks.add(translated);
-        } else {
-          // 번역 실패 시 null 반환
-          return null;
-        }
-        // API 레이트 리밋 방지를 위한 딜레이
-        if (chunks.length > 1) {
-          await Future.delayed(const Duration(milliseconds: 500));
-        }
-      }
-      
-      // 번역된 청크들 합치기
-      return translatedChunks.join(' ');
+      return await _callOpenAIAPI(text, targetLang);
     } catch (e) {
       print('Translation error: $e');
       return null;
     }
   }
   
-  // MyMemory API 호출
-  Future<String?> _callMyMemoryAPI(String text, String targetLang) async {
+  // OpenAI GPT-4o mini API 호출
+  Future<String?> _callOpenAIAPI(String text, String targetLang) async {
     try {
-      final url = Uri.parse(
-        'https://api.mymemory.translated.net/get?q=${Uri.encodeComponent(text)}&langpair=en|$targetLang'
-      );
+      // OpenAI API 키는 환경 변수에서 가져오거나 설정에서 로드
+      // TODO: 환경 변수나 설정 파일에서 API 키를 로드하도록 변경 필요
+      const apiKey = String.fromEnvironment('OPENAI_API_KEY', defaultValue: '');
+      if (apiKey.isEmpty) {
+        print('OpenAI API key not configured');
+        return null;
+      }
       
-      final response = await http.get(url).timeout(
-        const Duration(seconds: 10),
+      // 언어 이름 매핑
+      final languageName = _getLanguageName(targetLang);
+      
+      final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+      
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: json.encode({
+          'model': 'gpt-4o-mini',
+          'messages': [
+            {
+              'role': 'system',
+              'content': 'You are a professional translator. Translate the given English quote to $languageName. Maintain the meaning, tone, and style of the original quote. Only return the translation, nothing else.',
+            },
+            {
+              'role': 'user',
+              'content': text,
+            },
+          ],
+          'temperature': 0.3,
+          'max_tokens': 500,
+        }),
+      ).timeout(
+        const Duration(seconds: 30),
       );
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final translation = data['responseData']['translatedText'];
+        final translation = data['choices']?[0]?['message']?['content']?.toString().trim();
         
-        // 번역 품질 체크
         if (translation != null && 
-            translation != text && 
-            !translation.toString().toUpperCase().contains('MYMEMORY WARNING')) {
+            translation.isNotEmpty &&
+            translation != text &&
+            !translation.toLowerCase().contains('error') &&
+            !translation.toLowerCase().contains('sorry')) {
           return translation;
         }
+      } else {
+        print('OpenAI API error: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('MyMemory API error: $e');
+      print('OpenAI API error: $e');
     }
     
     return null;
+  }
+
+  // 언어 코드를 언어 이름으로 변환
+  String _getLanguageName(String langCode) {
+    const Map<String, String> languageNames = {
+      'ko': 'Korean',
+      'ja': 'Japanese',
+      'zh': 'Chinese (Simplified)',
+      'es': 'Spanish',
+      'fr': 'French',
+      'de': 'German',
+      'it': 'Italian',
+      'pt': 'Portuguese',
+      'ru': 'Russian',
+      'nl': 'Dutch',
+      'pl': 'Polish',
+      'uk': 'Ukrainian',
+      'tr': 'Turkish',
+      'el': 'Greek',
+      'cs': 'Czech',
+      'sv': 'Swedish',
+      'ro': 'Romanian',
+      'hu': 'Hungarian',
+      'fi': 'Finnish',
+      'da': 'Danish',
+      'no': 'Norwegian',
+      'hi': 'Hindi',
+      'th': 'Thai',
+      'vi': 'Vietnamese',
+      'id': 'Indonesian',
+      'ms': 'Malay',
+      'tl': 'Tagalog',
+      'ar': 'Arabic',
+      'fa': 'Persian',
+      'he': 'Hebrew',
+      'ur': 'Urdu',
+    };
+    
+    return languageNames[langCode] ?? langCode.toUpperCase();
   }
 
   // 미리 정의된 인기 명언 번역 (오프라인 지원)

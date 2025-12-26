@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/quote.dart';
 import '../services/quote_service.dart';
 import '../widgets/quote_card.dart';
@@ -15,7 +16,9 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   final QuoteService _quoteService = QuoteService();
+  final ScrollController _scrollController = ScrollController();
   bool _isLoading = true;
+  bool _hasRestoredScroll = false;
 
   @override
   void initState() {
@@ -28,6 +31,39 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     setState(() {
       _isLoading = false;
     });
+    _restoreScrollPosition();
+  }
+
+  Future<void> _restoreScrollPosition() async {
+    if (_hasRestoredScroll || _isLoading) return;
+    
+    final prefs = await SharedPreferences.getInstance();
+    final scrollOffset = prefs.getDouble('scroll_favorites') ?? 0.0;
+    
+    if (scrollOffset > 0 && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(scrollOffset);
+          _hasRestoredScroll = true;
+        }
+      });
+    } else {
+      _hasRestoredScroll = true;
+    }
+  }
+
+  Future<void> _saveScrollPosition() async {
+    if (!_scrollController.hasClients) return;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('scroll_favorites', _scrollController.offset);
+  }
+
+  @override
+  void dispose() {
+    _saveScrollPosition();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _toggleFavorite(Quote quote) async {
@@ -78,6 +114,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           ),
                         )
                       : ListView.builder(
+                          controller: _scrollController,
                           padding: const EdgeInsets.all(16),
                           itemCount: favorites.length,
                           itemBuilder: (context, index) {

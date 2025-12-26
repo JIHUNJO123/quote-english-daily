@@ -1,16 +1,48 @@
-# daily_quotes
+# QuoteSpace
 
-A new Flutter project.
+A global quotes app that brings you daily inspiration in your language. Get thousands of inspiring quotes automatically translated to your native language.
+
+## Features
+
+- **2,000+ Commercial-Use Quotes**: Carefully curated quotes from public domain sources
+- **10 Categories**: Happiness, Inspiration, Love, Success, Truth, Poetry, Life & Death, Romance, Science, Time
+- **30+ Languages**: Automatic translation using GPT-4o mini
+- **Daily Notifications**: Get a new quote every morning
+- **Save Favorites**: Bookmark quotes you love
+- **Rewarded Ads**: Watch ads to unlock free quotes
+- **Premium Option**: Remove ads with one-time purchase
+
+## App Information
+
+- **App Name**: QuoteSpace
+- **Bundle ID**: com.jihunjo.quotespace
+- **SKU**: quotespace_ios_001
+- **IAP Product ID**: com.quotespace.app.removeads
+- **IAP Price**: $1.99
+- **GitHub**: https://github.com/JIHUNJO123/quotespace
+
+## URLs
+
+- **Privacy Policy**: https://jihunjo123.github.io/quotespace/privacy-policy.html
+- **Marketing**: https://jihunjo123.github.io/quotespace/marketing.html
+- **Support**: https://jihunjo123.github.io/quotespace/support.html
+- **Contact**: jihun.jo@yahoo.com
+
+## App Store Content
+
+See `docs/app-store-content.md` for:
+- App Subtitle
+- Promotional Text (170 chars)
+- Full Description (4000 chars)
+- Keywords (100 chars)
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
+## License
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+© 2025 QuoteSpace. All rights reserved.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:ui' as ui;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home_screen.dart';
 import 'screens/category_screen.dart';
 import 'screens/favorites_screen.dart';
@@ -19,20 +20,27 @@ void main() async {
     await IAPService().initialize();
   }
   
-  // 시스템 언어 감지 및 UI 번역 초기화
+  // 저장된 언어 설정 로드 또는 시스템 언어 사용
+  final prefs = await SharedPreferences.getInstance();
+  final savedLanguage = prefs.getString('selected_language');
   final systemLocale = ui.PlatformDispatcher.instance.locale;
-  await AppLocalizations.initialize(systemLocale.languageCode);
+  final targetLanguage = savedLanguage ?? systemLocale.languageCode;
   
-  runApp(const DailyQuotesApp());
+  // UI 번역 초기화
+  await AppLocalizations.initialize(targetLanguage);
+  
+  runApp(DailyQuotesApp(locale: savedLanguage != null ? Locale(savedLanguage) : null));
 }
 
 class DailyQuotesApp extends StatelessWidget {
-  const DailyQuotesApp({super.key});
+  final Locale? locale;
+  
+  const DailyQuotesApp({super.key, this.locale});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quote English Daily',
+      title: 'QuoteSpace',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -58,6 +66,7 @@ class DailyQuotesApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: locale,
       
       home: const MainNavigator(),
     );

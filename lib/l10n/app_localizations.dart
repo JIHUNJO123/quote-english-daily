@@ -147,7 +147,10 @@ class AppLocalizations {
       // Translation
       'translation': 'Translation',
       'show_translation': 'Show Translation',
+      'hide_translation': 'Hide Translation',
       'translating': 'Translating...',
+      'auto_translate': 'Auto Translate',
+      'auto_translate_desc': 'Automatically translate quotes to your language',
       'notification_web_unavailable': 'Notifications are only available on mobile devices',
       
       // IAP
@@ -160,6 +163,18 @@ class AppLocalizations {
       'purchase_failed': 'Purchase failed. Please try again.',
       'already_premium': 'You already have premium!',
       'restoring': 'Restoring purchases...',
+      
+      // Rewarded Ads
+      'watch_ad_for_reward': 'Watch Ad for 10 Free Quotes',
+      'reward_received': 'You received {amount} free quotes!',
+      'rewarded_quotes_available': '{count} free quotes available',
+      
+      // Language
+      'language': 'Language',
+      'app_language': 'App Language',
+      'select_language': 'Select Language',
+      'language_changed_restart': 'Language changed. Please restart the app.',
+      'restart_app': 'Restart',
     },
     'ko': {
       // Navigation
@@ -219,7 +234,10 @@ class AppLocalizations {
       // Translation
       'translation': '번역',
       'show_translation': '번역 보기',
+      'hide_translation': '번역 숨기기',
       'translating': '번역 중...',
+      'auto_translate': '자동 번역',
+      'auto_translate_desc': '명언을 자동으로 번역하여 표시합니다',
       'notification_web_unavailable': '알림은 모바일 기기에서만 사용 가능합니다',
       
       // IAP
@@ -232,6 +250,18 @@ class AppLocalizations {
       'purchase_failed': '구매 실패. 다시 시도해주세요.',
       'already_premium': '이미 프리미엄 사용자입니다!',
       'restoring': '구매 복원 중...',
+      
+      // Rewarded Ads
+      'watch_ad_for_reward': '광고 시청하고 명언 10개 받기',
+      'reward_received': '명언 {amount}개를 받았습니다!',
+      'rewarded_quotes_available': '무료 명언 {count}개 사용 가능',
+      
+      // Language
+      'language': '언어',
+      'app_language': '앱 언어',
+      'select_language': '언어 선택',
+      'language_changed_restart': '언어가 변경되었습니다. 앱을 재시작해주세요.',
+      'restart_app': '재시작',
     },
     'ja': {
       'home': 'ホーム',
@@ -278,7 +308,10 @@ class AppLocalizations {
       'quotes_available': '件の名言',
       'translation': '翻訳',
       'show_translation': '翻訳を表示',
+      'hide_translation': '翻訳を非表示',
       'translating': '翻訳中...',
+      'auto_translate': '自動翻訳',
+      'auto_translate_desc': '名言を自動的に翻訳して表示します',
       'notification_web_unavailable': '通知はモバイル端末でのみ利用可能です',
       'premium': 'プレミアム',
       'remove_ads': '広告を削除',
@@ -289,6 +322,18 @@ class AppLocalizations {
       'purchase_failed': '購入に失敗しました。もう一度お試しください。',
       'already_premium': 'すでにプレミアムです！',
       'restoring': '購入を復元中...',
+      
+      // Rewarded Ads
+      'watch_ad_for_reward': '広告を見て名言10個を獲得',
+      'reward_received': '名言{amount}個を獲得しました！',
+      'rewarded_quotes_available': '無料名言{count}個利用可能',
+      
+      // Language
+      'language': '言語',
+      'app_language': 'アプリ言語',
+      'select_language': '言語を選択',
+      'language_changed_restart': '言語が変更されました。アプリを再起動してください。',
+      'restart_app': '再起動',
     },
     'zh': {
       'home': '首页',
@@ -335,7 +380,10 @@ class AppLocalizations {
       'quotes_available': '条名言',
       'translation': '翻译',
       'show_translation': '显示翻译',
+      'hide_translation': '隐藏翻译',
       'translating': '翻译中...',
+      'auto_translate': '自动翻译',
+      'auto_translate_desc': '自动将名言翻译为您的语言',
       'notification_web_unavailable': '通知仅在移动设备上可用',
       'premium': '高级版',
       'remove_ads': '移除广告',
@@ -346,6 +394,18 @@ class AppLocalizations {
       'purchase_failed': '购买失败，请重试。',
       'already_premium': '您已经是高级用户！',
       'restoring': '正在恢复购买...',
+      
+      // Rewarded Ads
+      'watch_ad_for_reward': '观看广告获得10条免费名言',
+      'reward_received': '您获得了{amount}条免费名言！',
+      'rewarded_quotes_available': '还有{count}条免费名言可用',
+      
+      // Language
+      'language': '语言',
+      'app_language': '应用语言',
+      'select_language': '选择语言',
+      'language_changed_restart': '语言已更改。请重启应用。',
+      'restart_app': '重启',
     },
     'es': {
       'home': 'Inicio',
@@ -385,7 +445,10 @@ class AppLocalizations {
       'quotes_available': 'citas disponibles',
       'translation': 'Traducción',
       'show_translation': 'Mostrar traducción',
+      'hide_translation': 'Ocultar traducción',
       'translating': 'Traduciendo...',
+      'auto_translate': 'Traducción automática',
+      'auto_translate_desc': 'Traducir automáticamente las citas a su idioma',
       'notification_web_unavailable': 'Las notificaciones solo están disponibles en dispositivos móviles',
       'premium': 'Premium',
       'remove_ads': 'Eliminar anuncios',
@@ -395,6 +458,18 @@ class AppLocalizations {
       'purchase_failed': 'Compra fallida. Inténtalo de nuevo.',
       'already_premium': '¡Ya tienes premium!',
       'restoring': 'Restaurando compras...',
+      
+      // Rewarded Ads
+      'watch_ad_for_reward': 'Ver anuncio para 10 citas gratis',
+      'reward_received': '¡Recibiste {amount} citas gratis!',
+      'rewarded_quotes_available': '{count} citas gratis disponibles',
+      
+      // Language
+      'language': 'Idioma',
+      'app_language': 'Idioma de la app',
+      'select_language': 'Seleccionar idioma',
+      'language_changed_restart': 'Idioma cambiado. Por favor reinicia la app.',
+      'restart_app': 'Reiniciar',
     },
   };
 
@@ -436,133 +511,47 @@ class AppLocalizations {
   
   static List<String> get supportedLanguageCodes => _allLanguageCodes;
 
-  // 전 세계 175개국 언어 이름 (각 언어의 모국어 표기)
+  // 주요 사용자 언어 (약 30개)
   static const Map<String, String> _languageNames = {
-    // 주요 언어
+    // 동아시아
     'en': 'English',
     'ko': '한국어',
     'ja': '日本語',
     'zh': '中文',
-    'es': 'Español',
     
-    // 유럽 언어
-    'de': 'Deutsch',
+    // 유럽 주요 언어
+    'es': 'Español',
     'fr': 'Français',
+    'de': 'Deutsch',
     'it': 'Italiano',
     'pt': 'Português',
     'ru': 'Русский',
-    'pl': 'Polski',
     'nl': 'Nederlands',
-    'sv': 'Svenska',
-    'no': 'Norsk',
-    'da': 'Dansk',
-    'fi': 'Suomi',
+    'pl': 'Polski',
+    'uk': 'Українська',
+    'tr': 'Türkçe',
     'el': 'Ελληνικά',
     'cs': 'Čeština',
-    'sk': 'Slovenčina',
-    'hu': 'Magyar',
+    'sv': 'Svenska',
     'ro': 'Română',
-    'bg': 'Български',
-    'hr': 'Hrvatski',
-    'sr': 'Српски',
-    'sl': 'Slovenščina',
-    'uk': 'Українська',
-    'be': 'Беларуская',
-    'lt': 'Lietuvių',
-    'lv': 'Latviešu',
-    'et': 'Eesti',
-    'is': 'Íslenska',
-    'ga': 'Gaeilge',
-    'cy': 'Cymraeg',
-    'mt': 'Malti',
-    'lb': 'Lëtzebuergesch',
-    'mk': 'Македонски',
-    'sq': 'Shqip',
-    'bs': 'Bosanski',
-    'ca': 'Català',
-    'gl': 'Galego',
-    'eu': 'Euskara',
+    'hu': 'Magyar',
+    'fi': 'Suomi',
+    'da': 'Dansk',
+    'no': 'Norsk',
     
-    // 아시아 언어
+    // 남아시아/동남아시아
     'hi': 'हिन्दी',
-    'bn': 'বাংলা',
-    'pa': 'ਪੰਜਾਬੀ',
-    'gu': 'ગુજરાતી',
-    'mr': 'मराठी',
-    'ta': 'தமிழ்',
-    'te': 'తెలుగు',
-    'kn': 'ಕನ್ನಡ',
-    'ml': 'മലയാളം',
-    'or': 'ଓଡ଼ିଆ',
-    'as': 'অসমীয়া',
-    'ne': 'नेपाली',
-    'si': 'සිංහල',
     'th': 'ไทย',
     'vi': 'Tiếng Việt',
     'id': 'Bahasa Indonesia',
     'ms': 'Bahasa Melayu',
     'tl': 'Tagalog',
-    'my': 'မြန်မာဘာသာ',
-    'km': 'ភាសាខ្មែរ',
-    'lo': 'ລາວ',
-    'mn': 'Монгол',
-    'bo': 'བོད་སྐད།',
-    'dz': 'རྫོང་ཁ།',
-    'ka': 'ქართული',
-    'hy': 'Հայdelays',
-    'az': 'Azərbaycan',
-    'kk': 'Қазақша',
-    'ky': 'Кыргызча',
-    'uz': 'Oʻzbekcha',
-    'tk': 'Türkmençe',
-    'tg': 'Тоҷикӣ',
     
-    // 중동/아랍 언어
+    // 중동
     'ar': 'العربية',
     'fa': 'فارسی',
     'he': 'עברית',
-    'tr': 'Türkçe',
     'ur': 'اردو',
-    'ps': 'پښتو',
-    'ku': 'Kurdî',
-    
-    // 아프리카 언어
-    'sw': 'Kiswahili',
-    'am': 'አማርኛ',
-    'ha': 'Hausa',
-    'yo': 'Yorùbá',
-    'ig': 'Igbo',
-    'zu': 'isiZulu',
-    'xh': 'isiXhosa',
-    'af': 'Afrikaans',
-    'so': 'Soomaali',
-    'rw': 'Kinyarwanda',
-    'mg': 'Malagasy',
-    'sn': 'chiShona',
-    'ny': 'Chichewa',
-    'lg': 'Luganda',
-    'wo': 'Wolof',
-    
-    // 태평양/오세아니아
-    'mi': 'Te Reo Māori',
-    'sm': 'Gagana Samoa',
-    'to': 'Lea Fakatonga',
-    'fj': 'Na Vosa Vakaviti',
-    'haw': 'ʻŌlelo Hawaiʻi',
-    
-    // 기타
-    'eo': 'Esperanto',
-    'la': 'Latina',
-    'jv': 'Basa Jawa',
-    'su': 'Basa Sunda',
-    'ceb': 'Cebuano',
-    'ht': 'Kreyòl Ayisyen',
-    'yi': 'ייִדיש',
-    'fy': 'Frysk',
-    'gd': 'Gàidhlig',
-    'co': 'Corsu',
-    'oc': 'Occitan',
-    'br': 'Brezhoneg',
   };
 
   String get languageName {

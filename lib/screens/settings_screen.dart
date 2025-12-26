@@ -5,6 +5,7 @@ import '../services/iap_service.dart';
 import '../services/ad_service.dart';
 import '../widgets/banner_ad_widget.dart';
 import '../l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -179,6 +180,72 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  String _getCurrentLanguageName(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return l10n.languageName;
+  }
+
+  Future<void> _showLanguageSelector(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final currentLocale = Localizations.localeOf(context);
+    final supportedLanguages = AppLocalizations.supportedLanguageCodes;
+    
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.get('select_language')),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: supportedLanguages.length,
+            itemBuilder: (context, index) {
+              final langCode = supportedLanguages[index];
+              final testLocale = Locale(langCode);
+              final testL10n = AppLocalizations(testLocale);
+              final isSelected = currentLocale.languageCode == langCode;
+              
+              return ListTile(
+                title: Text(testL10n.languageName),
+                subtitle: Text(langCode.toUpperCase()),
+                leading: isSelected 
+                    ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+                    : const Icon(Icons.circle_outlined),
+                onTap: () async {
+                  await _changeLanguage(context, langCode);
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _changeLanguage(BuildContext context, String langCode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_language', langCode);
+    
+    // 앱 재시작 필요 안내
+    if (mounted) {
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.get('language_changed_restart')),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: l10n.get('restart_app'),
+            onPressed: () {
+              // 앱 재시작은 플랫폼별로 다르게 처리해야 함
+              // 여기서는 단순히 안내만 표시
+            },
+          ),
+        ),
+      );
+    }
+  }
+
   String _formatTime(TimeOfDay time, AppLocalizations l10n) {
     final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
     final minute = time.minute.toString().padLeft(2, '0');
@@ -324,6 +391,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const Divider(height: 32),
                       ],
                       
+                      // 언어 설정 섹션
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          l10n.get('language'),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      
+                      ListTile(
+                        leading: const Icon(Icons.language),
+                        title: Text(l10n.get('app_language')),
+                        subtitle: Text(_getCurrentLanguageName(context)),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => _showLanguageSelector(context),
+                      ),
+                      
+                      const Divider(height: 32),
+                      
                       // 앱 정보 섹션
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -349,9 +438,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () {
                           showAboutDialog(
                             context: context,
-                            applicationName: 'Quote English Daily',
+                            applicationName: 'QuoteSpace',
                             applicationVersion: '1.0.0',
-                            applicationLegalese: '© 2024 Quote English Daily',
+                            applicationLegalese: '© 2024 QuoteSpace',
                             children: const [
                               SizedBox(height: 16),
                               Text(

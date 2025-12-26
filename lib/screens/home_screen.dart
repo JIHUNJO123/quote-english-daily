@@ -4,7 +4,6 @@ import '../models/quote.dart';
 import '../services/quote_service.dart';
 import '../services/ad_service.dart';
 import '../widgets/quote_card.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Quote? _currentQuote;
   bool _isLoading = true;
   bool _showDailyQuote = true;
-  int _quoteViewCount = 0;
   String? _selectedCategory;
 
   @override
@@ -38,18 +36,34 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _getNewQuote() {
-    _quoteViewCount++;
-    
-    // 5번마다 전면 광고 표시
-    if (_quoteViewCount % 5 == 0 && !kIsWeb) {
-      _adService.showInterstitialAd();
-    }
+  Future<void> _getNewQuote() async {
+    // 보상 명언이 있으면 사용
+    await _quoteService.useRewardedQuote();
     
     setState(() {
       _currentQuote = _quoteService.getRandomQuote();
       _showDailyQuote = false;
     });
+  }
+
+  Future<void> _showRewardedAd() async {
+    final l10n = AppLocalizations.of(context);
+    
+    await _adService.showRewardedAd(
+      onRewarded: (rewardAmount, rewardType) async {
+        await _quoteService.addRewardedQuotes(rewardAmount);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.get('reward_received').replaceAll('{amount}', rewardAmount.toString())),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+    );
   }
 
   void _showDailyQuoteAgain() {
@@ -245,25 +259,73 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     
-                    // 새 명언 버튼
+                    // 새 명언 버튼 및 보상형 광고 버튼
                     Padding(
                       padding: const EdgeInsets.all(20),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: _getNewQuote,
-                          icon: const Icon(Icons.refresh),
-                          label: Text(l10n.get('new_quote')),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Column(
+                        children: [
+                          // 보상 명언 수 표시
+                          if (_quoteService.rewardedQuotes > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.stars,
+                                    size: 16,
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    l10n.get('rewarded_quotes_available').replaceAll('{count}', _quoteService.rewardedQuotes.toString()),
+                                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          
+                          // 새 명언 버튼
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed: _getNewQuote,
+                              icon: const Icon(Icons.refresh),
+                              label: Text(l10n.get('new_quote')),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                            ),
                           ),
-                        ),
+                          
+                          // 보상형 광고 버튼
+                          if (!kIsWeb && _adService.shouldShowAds)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: OutlinedButton.icon(
+                                onPressed: _showRewardedAd,
+                                icon: const Icon(Icons.play_circle_outline),
+                                label: Text(l10n.get('watch_ad_for_reward')),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  side: BorderSide(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    
-                    // 배너 광고 (웹이 아닌 경우에만)
-                    if (!kIsWeb)
-                      const BannerAdWidget(),
                   ],
                 ),
         ),

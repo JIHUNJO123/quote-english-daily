@@ -13,6 +13,7 @@ class QuoteService {
   List<Quote> _favorites = [];
   final Random _random = Random();
   String? _selectedCategory; // 선택된 카테고리 필터
+  int _rewardedQuotes = 0; // 보상으로 받은 추가 명언 수
 
   Future<void> loadQuotes() async {
     try {
@@ -21,11 +22,39 @@ class QuoteService {
       _quotes = jsonList.map((json) => Quote.fromJson(json)).toList();
       await _loadFavorites();
       await _loadSelectedCategory();
+      await _loadRewardedQuotes();
     } catch (e) {
       print('Error loading quotes: $e');
       _quotes = [];
     }
   }
+
+  // 보상 명언 수 로드
+  Future<void> _loadRewardedQuotes() async {
+    final prefs = await SharedPreferences.getInstance();
+    _rewardedQuotes = prefs.getInt('rewarded_quotes') ?? 0;
+  }
+
+  // 보상 명언 추가
+  Future<void> addRewardedQuotes(int amount) async {
+    _rewardedQuotes += amount;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('rewarded_quotes', _rewardedQuotes);
+  }
+
+  // 보상 명언 사용
+  Future<bool> useRewardedQuote() async {
+    if (_rewardedQuotes > 0) {
+      _rewardedQuotes--;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('rewarded_quotes', _rewardedQuotes);
+      return true;
+    }
+    return false;
+  }
+
+  // 보상 명언 수 확인
+  int get rewardedQuotes => _rewardedQuotes;
 
   // 선택된 카테고리 저장/로드
   Future<void> _loadSelectedCategory() async {

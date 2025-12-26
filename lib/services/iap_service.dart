@@ -12,7 +12,7 @@ class IAPService {
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   
   // 상품 ID (앱스토어/플레이스토어에서 설정한 ID와 일치해야 함)
-  static const String removeAdsProductId = 'remove_ads';
+  static const String removeAdsProductId = 'com.quotespace.app.removeads';
   static const Set<String> _productIds = {removeAdsProductId};
   
   List<ProductDetails> _products = [];

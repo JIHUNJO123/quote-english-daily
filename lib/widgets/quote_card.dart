@@ -27,7 +27,29 @@ class _QuoteCardState extends State<QuoteCard> {
   final TranslationService _translationService = TranslationService();
   String? _translation;
   bool _isTranslating = false;
-  bool _showTranslation = false;
+  bool _showTranslation = true; // 기본적으로 번역 표시
+  String? _currentLangCode;
+
+  @override
+  void initState() {
+    super.initState();
+    // TranslationService 캐시 로드
+    _translationService.loadCache();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final langCode = Localizations.localeOf(context).languageCode;
+
+    // 언어가 바뀌었거나 명언이 바뀌었을 때 자동 번역
+    if (langCode != _currentLangCode || _translation == null) {
+      _currentLangCode = langCode;
+      if (langCode != 'en') {
+        _loadTranslation(langCode);
+      }
+    }
+  }
 
   @override
   void didUpdateWidget(covariant QuoteCard oldWidget) {
@@ -36,9 +58,13 @@ class _QuoteCardState extends State<QuoteCard> {
     if (oldWidget.quote.text != widget.quote.text) {
       setState(() {
         _translation = null;
-        _showTranslation = false;
         _isTranslating = false;
       });
+      // 새로운 명언 자동 번역
+      final langCode = Localizations.localeOf(context).languageCode;
+      if (langCode != 'en') {
+        _loadTranslation(langCode);
+      }
     }
   }
 
@@ -57,11 +83,12 @@ class _QuoteCardState extends State<QuoteCard> {
 
   Future<void> _loadTranslation(String langCode) async {
     if (langCode == 'en' || _translation != null) return;
-    
+
     setState(() => _isTranslating = true);
-    
+
     // 먼저 오프라인 번역 확인
-    final offline = _translationService.getOfflineTranslation(widget.quote.text, langCode);
+    final offline =
+        _translationService.getOfflineTranslation(widget.quote.text, langCode);
     if (offline != null) {
       setState(() {
         _translation = offline;
@@ -69,9 +96,10 @@ class _QuoteCardState extends State<QuoteCard> {
       });
       return;
     }
-    
+
     // 온라인 번역 시도
-    final translation = await _translationService.getTranslation(widget.quote.text, langCode);
+    final translation =
+        await _translationService.getTranslation(widget.quote.text, langCode);
     if (mounted) {
       setState(() {
         _translation = translation;
@@ -116,28 +144,75 @@ class _QuoteCardState extends State<QuoteCard> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
-                      // 번역 표시
-                      if (showTranslateButton && _showTranslation && _translation != null) ...[
-                        const SizedBox(height: 8),
+
+                      // 번역 표시 (자동으로 표시, 영어가 아닌 경우)
+                      if (showTranslateButton &&
+                          _showTranslation &&
+                          _translation != null) ...[
+                        const SizedBox(height: 12),
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            _translation!,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: widget.compact ? 12 : 14,
-                              height: 1.4,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.3),
+                              width: 1,
                             ),
-                            textAlign: TextAlign.center,
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.translate,
+                                    size: 14,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    l10n.get('translation'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _translation!,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      fontSize: widget.compact ? 13 : 15,
+                                      height: 1.5,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                      
+
                       if (_isTranslating) ...[
                         const SizedBox(height: 12),
                         Row(
@@ -153,9 +228,9 @@ class _QuoteCardState extends State<QuoteCard> {
                           ],
                         ),
                       ],
-                      
+
                       SizedBox(height: widget.compact ? 10 : 16),
-                      
+
                       // 저자
                       Text(
                         widget.quote.author,
@@ -170,12 +245,13 @@ class _QuoteCardState extends State<QuoteCard> {
                   ),
                 ),
               ),
-              
+
               SizedBox(height: widget.compact ? 8 : 14),
-              
+
               // 카테고리 태그
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(16),
@@ -183,15 +259,15 @@ class _QuoteCardState extends State<QuoteCard> {
                 child: Text(
                   l10n.getCategory(widget.quote.category).toUpperCase(),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontSize: 10,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
-              
+
               SizedBox(height: widget.compact ? 8 : 14),
-              
+
               // 액션 버튼들
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -199,25 +275,30 @@ class _QuoteCardState extends State<QuoteCard> {
                   IconButton(
                     onPressed: widget.onFavoritePressed,
                     icon: Icon(
-                      widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                      widget.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
                       color: widget.isFavorite ? Colors.red : null,
                     ),
                     tooltip: l10n.get('favorites'),
                   ),
-                  // 번역 버튼 (영어가 아닌 경우만)
+                  // 번역 토글 버튼 (영어가 아닌 경우만)
                   if (showTranslateButton)
                     IconButton(
                       onPressed: () {
-                        if (!_showTranslation && _translation == null) {
-                          _loadTranslation(langCode);
-                        }
                         setState(() => _showTranslation = !_showTranslation);
                       },
                       icon: Icon(
-                        _showTranslation ? Icons.translate : Icons.translate_outlined,
-                        color: _showTranslation ? Theme.of(context).colorScheme.primary : null,
+                        _showTranslation
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: _showTranslation
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
                       ),
-                      tooltip: l10n.get('translation'),
+                      tooltip: _showTranslation
+                          ? l10n.get('hide_translation')
+                          : l10n.get('show_translation'),
                     ),
                   IconButton(
                     onPressed: () => _copyToClipboard(context),

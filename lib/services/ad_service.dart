@@ -10,9 +10,12 @@ class AdService {
 
   BannerAd? _bannerAd;
   InterstitialAd? _interstitialAd;
+  RewardedAd? _rewardedAd;
   bool _isInitialized = false;
-  int _quoteViewCount = 0;
   bool _isPremium = false;
+  
+  // 보상형 광고 콜백
+  Function(int rewardAmount, String rewardType)? _onRewarded;
 
   // 프리미엄 상태 확인
   bool get isPremium => _isPremium;
@@ -54,6 +57,16 @@ class AdService {
     return '';
   }
 
+  static String get rewardedAdUnitId {
+    if (kIsWeb) return '';
+    if (Platform.isAndroid) {
+      return 'ca-app-pub-5837885590326347/6752195239'; // Android 보상형 전면
+    } else if (Platform.isIOS) {
+      return 'ca-app-pub-5837885590326347/8065276902'; // iOS 보상형 전면
+    }
+    return '';
+  }
+
   // 플랫폼이 광고를 지원하는지 확인 (프리미엄이면 광고 안 보임)
   static bool get isSupported => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
   bool get shouldShowAds => isSupported && !_isPremium;
@@ -71,10 +84,8 @@ class AdService {
     await MobileAds.instance.initialize();
     _isInitialized = true;
     
-    // 배너 광고 미리 로드
-    await loadBannerAd();
-    // 전면 광고 미리 로드
-    await loadInterstitialAd();
+    // 보상형 광고 미리 로드
+    await loadRewardedAd();
   }
 
   // 배너 광고 로드
@@ -123,45 +134,82 @@ class AdService {
   // 배너 광고 가져오기
   BannerAd? get bannerAd => _bannerAd;
 
-  // 명언 조회 수 증가 및 전면 광고 표시 (5번마다)
-  Future<void> incrementQuoteView() async {
+  // 더 이상 사용하지 않음 (보상형 광고로 대체)
+
+  // 보상형 광고 로드
+  Future<void> loadRewardedAd() async {
     if (!shouldShowAds) return;
 
-    _quoteViewCount++;
-    
-    // 5번 명언 볼 때마다 전면 광고
-    if (_quoteViewCount >= 5) {
-      await showInterstitialAd();
-      _quoteViewCount = 0;
-    }
+    await RewardedAd.load(
+      adUnitId: rewardedAdUnitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          _rewardedAd = ad;
+          print('보상형 광고 로드됨');
+        },
+        onAdFailedToLoad: (error) {
+          print('보상형 광고 로드 실패: $error');
+          _rewardedAd = null;
+        },
+      ),
+    );
   }
 
-  // 전면 광고 표시
-  Future<void> showInterstitialAd() async {
-    if (!shouldShowAds) return;
-    
-    if (_interstitialAd == null) {
-      await loadInterstitialAd();
+  // 보상형 광고 표시
+  Future<void> showRewardedAd({
+    required Function(int rewardAmount, String rewardType) onRewarded,
+  }) async {
+    if (!shouldShowAds) {
+      // 프리미엄 사용자에게는 보상 제공
+      onRewarded(10, 'quotes');
       return;
     }
+    
+    if (_rewardedAd == null) {
+      await loadRewardedAd();
+      if (_rewardedAd == null) {
+        // 광고 로드 실패 시에도 보상 제공 (사용자 경험)
+        onRewarded(5, 'quotes');
+        return;
+      }
+    }
 
-    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+    _onRewarded = onRewarded;
+
+    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
-        loadInterstitialAd(); // 다음 광고 미리 로드
+        loadRewardedAd(); // 다음 광고 미리 로드
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
         ad.dispose();
-        loadInterstitialAd();
+        loadRewardedAd();
+        // 실패 시에도 작은 보상 제공
+        if (_onRewarded != null) {
+          _onRewarded!(3, 'quotes');
+        }
       },
     );
 
-    await _interstitialAd!.show();
-    _interstitialAd = null;
+    await _rewardedAd!.show(
+      onUserEarnedReward: (ad, reward) {
+        // 보상 지급
+        if (_onRewarded != null) {
+          _onRewarded!(reward.amount.toInt(), reward.type);
+        }
+      },
+    );
+    _rewardedAd = null;
+    _onRewarded = null;
   }
+
+  // 보상형 광고 준비 여부 확인
+  bool get isRewardedAdReady => _rewardedAd != null;
 
   void dispose() {
     _bannerAd?.dispose();
     _interstitialAd?.dispose();
+    _rewardedAd?.dispose();
   }
 }
