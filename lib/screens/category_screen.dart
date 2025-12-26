@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import '../services/quote_service.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../l10n/app_localizations.dart';
 import 'quote_list_screen.dart';
 
@@ -60,7 +58,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.get('categories')),
@@ -74,7 +72,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         childAspectRatio: 1.5,
                         crossAxisSpacing: 10,
@@ -83,13 +82,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       itemCount: _categories.length,
                       itemBuilder: (context, index) {
                         final category = _categories[index];
-                        final quotes = _quoteService.getQuotesByCategory(category);
-                        
+                        final quotes =
+                            _quoteService.getQuotesByCategory(category);
+
                         return _CategoryCard(
                           category: category,
                           displayName: l10n.getCategory(category),
-                          icon: _categoryIcons[category.toLowerCase()] ?? Icons.format_quote,
-                          color: _categoryColors[category.toLowerCase()] ?? Colors.grey,
+                          icon: _categoryIcons[category.toLowerCase()] ??
+                              Icons.format_quote,
+                          color: _categoryColors[category.toLowerCase()] ??
+                              Colors.grey,
                           quoteCount: quotes.length,
                           quotesCountLabel: l10n.get('quotes_count'),
                           onTap: () {
@@ -108,9 +110,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ),
                   ),
                 ),
-                // 배너 광고
-                if (!kIsWeb)
-                  const BannerAdWidget(),
               ],
             ),
     );

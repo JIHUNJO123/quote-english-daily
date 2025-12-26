@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../services/notification_service.dart';
 import '../services/iap_service.dart';
 import '../services/ad_service.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -45,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     await _notificationService.initialize();
     final settings = await _notificationService.getNotificationSettings();
-    
+
     setState(() {
       _notificationsEnabled = settings['enabled'] ?? false;
       _notificationTime = TimeOfDay(
@@ -59,18 +58,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _toggleNotifications(BuildContext context, bool value) async {
     final l10n = AppLocalizations.of(context);
-    
+
     if (value) {
       final granted = await _notificationService.requestPermissions();
       if (!granted) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.get('notification_permission_required'))),
+            SnackBar(
+                content: Text(l10n.get('notification_permission_required'))),
           );
         }
         return;
       }
-      
+
       await _notificationService.scheduleDailyNotification(
         hour: _notificationTime.hour,
         minute: _notificationTime.minute,
@@ -79,15 +79,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } else {
       await _notificationService.cancelAllNotifications();
     }
-    
+
     setState(() {
       _notificationsEnabled = value;
     });
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(value ? l10n.get('notification_on') : l10n.get('notification_off')),
+          content: Text(value
+              ? l10n.get('notification_on')
+              : l10n.get('notification_off')),
         ),
       );
     }
@@ -97,7 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _notificationUseEnglish = useEnglish;
     });
-    
+
     if (_notificationsEnabled) {
       await _notificationService.scheduleDailyNotification(
         hour: _notificationTime.hour,
@@ -109,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showLanguageDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -145,7 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _selectTime(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    
+
     final picked = await showTimePicker(
       context: context,
       initialTime: _notificationTime,
@@ -167,11 +169,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           hour: picked.hour,
           minute: picked.minute,
         );
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('${l10n.get('notification_time_changed')} ${_formatTime(picked, l10n)}'),
+              content: Text(
+                  '${l10n.get('notification_time_changed')} ${_formatTime(picked, l10n)}'),
             ),
           );
         }
@@ -183,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
     final minute = time.minute.toString().padLeft(2, '0');
     final locale = l10n.locale.languageCode;
-    
+
     if (locale == 'ko') {
       final period = time.period == DayPeriod.am ? '오전' : '오후';
       return '$period $hour:$minute';
@@ -202,7 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.get('settings')),
@@ -216,27 +219,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: ListView(
                     children: [
                       const SizedBox(height: 16),
-                      
+
                       // 알림 섹션
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           l10n.get('notifications'),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
-                      
+
                       // 웹에서는 알림 기능 제한 안내
                       if (kIsWeb)
                         ListTile(
                           leading: const Icon(Icons.info_outline),
                           title: Text(l10n.get('daily_notification')),
-                          subtitle: Text(l10n.get('notification_web_unavailable')),
+                          subtitle:
+                              Text(l10n.get('notification_web_unavailable')),
                         )
-                      else ...[                
+                      else ...[
                         SwitchListTile(
                           title: Text(l10n.get('daily_notification')),
                           subtitle: Text(
@@ -245,48 +252,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 : l10n.get('notification_off'),
                           ),
                           value: _notificationsEnabled,
-                          onChanged: (value) => _toggleNotifications(context, value),
+                          onChanged: (value) =>
+                              _toggleNotifications(context, value),
                           secondary: Icon(
                             _notificationsEnabled
                                 ? Icons.notifications_active
                                 : Icons.notifications_off,
                           ),
                         ),
-                        
                         ListTile(
                           leading: const Icon(Icons.access_time),
                           title: Text(l10n.get('notification_time')),
                           subtitle: Text(_formatTime(_notificationTime, l10n)),
                           trailing: const Icon(Icons.chevron_right),
                           enabled: _notificationsEnabled,
-                          onTap: _notificationsEnabled ? () => _selectTime(context) : null,
+                          onTap: _notificationsEnabled
+                              ? () => _selectTime(context)
+                              : null,
                         ),
-                        
                         ListTile(
                           leading: const Icon(Icons.language),
                           title: Text(l10n.get('notification_language')),
-                          subtitle: Text(_notificationUseEnglish ? 'English' : l10n.get('local_language')),
+                          subtitle: Text(_notificationUseEnglish
+                              ? 'English'
+                              : l10n.get('local_language')),
                           trailing: const Icon(Icons.chevron_right),
                           enabled: _notificationsEnabled,
-                          onTap: _notificationsEnabled ? () => _showLanguageDialog(context) : null,
+                          onTap: _notificationsEnabled
+                              ? () => _showLanguageDialog(context)
+                              : null,
                         ),
                       ],
-                      
+
                       const Divider(height: 32),
-                      
+
                       // 프리미엄 섹션 (웹이 아닌 경우만)
                       if (!kIsWeb) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             l10n.get('premium'),
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
-                        
                         if (_iapService.isPremium)
                           ListTile(
                             leading: Icon(
@@ -295,57 +309,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             title: Text(l10n.get('remove_ads')),
                             subtitle: Text(l10n.get('already_premium')),
-                            trailing: const Icon(Icons.check_circle, color: Colors.green),
+                            trailing: const Icon(Icons.check_circle,
+                                color: Colors.green),
                           )
                         else
                           ListTile(
                             leading: const Icon(Icons.remove_circle_outline),
                             title: Text(l10n.get('remove_ads')),
                             subtitle: Text(
-                              _iapService.getRemoveAdsPrice() ?? l10n.get('remove_ads_desc'),
+                              _iapService.getRemoveAdsPrice() ??
+                                  l10n.get('remove_ads_desc'),
                             ),
-                            trailing: _isPurchasing 
+                            trailing: _isPurchasing
                                 ? const SizedBox(
                                     width: 24,
                                     height: 24,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
                                   )
                                 : const Icon(Icons.chevron_right),
-                            onTap: _isPurchasing ? null : () => _purchaseRemoveAds(context),
+                            onTap: _isPurchasing
+                                ? null
+                                : () => _purchaseRemoveAds(context),
                           ),
-                        
                         ListTile(
                           leading: const Icon(Icons.restore),
                           title: Text(l10n.get('restore_purchases')),
                           subtitle: Text(l10n.get('restore_purchases_desc')),
                           onTap: () => _restorePurchases(context),
                         ),
-                        
                         const Divider(height: 32),
                       ],
-                      
+
                       // 앱 정보 섹션
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           l10n.get('app_info'),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
-                      
+
                       ListTile(
                         leading: const Icon(Icons.info_outline),
                         title: Text(l10n.get('version')),
                         subtitle: const Text('1.0.0'),
                       ),
-                      
+
                       ListTile(
                         leading: const Icon(Icons.format_quote),
                         title: Text(l10n.get('quote_data')),
-                        subtitle: Text('27,664 ${l10n.get('quotes_available')}'),
+                        subtitle:
+                            Text('27,664 ${l10n.get('quotes_available')}'),
                         onTap: () {
                           showAboutDialog(
                             context: context,
@@ -362,14 +383,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 16),
                     ],
                   ),
                 ),
-                // 배너 광고 (프리미엄이 아닌 경우)
-                if (!kIsWeb && _adService.shouldShowAds)
-                  const BannerAdWidget(),
               ],
             ),
     );
@@ -377,9 +395,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _purchaseRemoveAds(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    
+
     setState(() => _isPurchasing = true);
-    
+
     try {
       final success = await _iapService.purchaseRemoveAds();
       if (!success && mounted) {
@@ -402,13 +420,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _restorePurchases(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.get('restoring'))),
     );
-    
+
     await _iapService.restorePurchases();
-    
+
     if (mounted && _iapService.isPremium) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.get('purchase_success'))),

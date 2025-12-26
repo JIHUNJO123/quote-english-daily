@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/quote.dart';
 import '../services/quote_service.dart';
 import '../widgets/quote_card.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../l10n/app_localizations.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -63,16 +61,24 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               const SizedBox(height: 16),
                               Text(
                                 l10n.get('no_favorites'),
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.outline,
+                                    ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 l10n.get('add_favorites_hint'),
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.outline,
+                                    ),
                               ),
                             ],
                           ),
@@ -94,9 +100,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           },
                         ),
                 ),
-                // 배너 광고
-                if (!kIsWeb)
-                  const BannerAdWidget(),
               ],
             ),
     );

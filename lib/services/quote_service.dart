@@ -14,7 +14,7 @@ class QuoteService {
   final Random _random = Random();
   String? _selectedCategory; // 선택된 카테고리 필터
   int _rewardedQuotes = 0; // 보상으로 받은 명언 수
-  
+
   // 추가 필터 옵션
   bool _filterFamousOnly = false;
   bool _filterShortOnly = false;
@@ -123,25 +123,25 @@ class QuoteService {
     final prefs = await SharedPreferences.getInstance();
     _selectedCategory = prefs.getString('selected_category');
   }
-  
+
   // 필터 옵션 저장/로드
   Future<void> _loadFilterOptions() async {
     final prefs = await SharedPreferences.getInstance();
     _filterFamousOnly = prefs.getBool('filter_famous_only') ?? false;
     _filterShortOnly = prefs.getBool('filter_short_only') ?? false;
   }
-  
+
   // 필터 옵션 게터
   bool get filterFamousOnly => _filterFamousOnly;
   bool get filterShortOnly => _filterShortOnly;
-  
+
   // 필터 옵션 세터
   Future<void> setFilterFamousOnly(bool value) async {
     _filterFamousOnly = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('filter_famous_only', value);
   }
-  
+
   Future<void> setFilterShortOnly(bool value) async {
     _filterShortOnly = value;
     final prefs = await SharedPreferences.getInstance();
@@ -171,26 +171,26 @@ class QuoteService {
   bool _isShortQuote(Quote quote) {
     return quote.text.length <= 100;
   }
-  
+
   // 추가 필터 적용
   List<Quote> _applyAdditionalFilters(List<Quote> quotes) {
     var filtered = quotes;
-    
+
     if (_filterFamousOnly) {
       filtered = filtered.where((q) => _isFamousQuote(q)).toList();
     }
-    
+
     if (_filterShortOnly) {
       filtered = filtered.where((q) => _isShortQuote(q)).toList();
     }
-    
+
     return filtered;
   }
 
   // 필터링된 명언 목록
   List<Quote> get _filteredQuotes {
     List<Quote> baseQuotes;
-    
+
     if (_selectedCategory == null || _selectedCategory!.isEmpty) {
       baseQuotes = _quotes;
     } else if (_selectedCategory == categoryFamous) {
@@ -202,29 +202,31 @@ class QuoteService {
     } else {
       // 일반 카테고리
       baseQuotes = _quotes
-          .where((q) => q.category.toLowerCase() == _selectedCategory!.toLowerCase())
+          .where((q) =>
+              q.category.toLowerCase() == _selectedCategory!.toLowerCase())
           .toList();
     }
-    
+
     // 추가 필터 적용 (특수 카테고리가 아닌 경우에만)
-    if (_selectedCategory != categoryFamous && _selectedCategory != categoryShort) {
+    if (_selectedCategory != categoryFamous &&
+        _selectedCategory != categoryShort) {
       return _applyAdditionalFilters(baseQuotes);
     }
-    
+
     return baseQuotes;
   }
 
   // 특수 카테고리별 명언 수
   int get famousQuotesCount => _quotes.where((q) => _isFamousQuote(q)).length;
   int get shortQuotesCount => _quotes.where((q) => _isShortQuote(q)).length;
-  
+
   // 현재 필터에 맞는 명언 수 (추가 필터 적용 후)
   int get currentFilteredCount => _filteredQuotes.length;
-  
+
   // 카테고리별 필터 적용 후 명언 수 계산
   int getFilteredCountForCategory(String? category) {
     List<Quote> baseQuotes;
-    
+
     if (category == null) {
       baseQuotes = _quotes;
     } else if (category == categoryFamous || category == categoryShort) {
@@ -239,7 +241,7 @@ class QuoteService {
           .where((q) => q.category.toLowerCase() == category.toLowerCase())
           .toList();
     }
-    
+
     return _applyAdditionalFilters(baseQuotes).length;
   }
 

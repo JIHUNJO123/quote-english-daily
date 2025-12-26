@@ -145,20 +145,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // 추가 필터 토글 섹션
                 _buildFilterToggleSection(context, l10n, setModalState),
-                
+
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 8),
-                
+
                 // 특수 카테고리 섹션 (추가 필터가 꺼져있을 때만)
-                if (!_quoteService.filterFamousOnly && !_quoteService.filterShortOnly) ...[
+                if (!_quoteService.filterFamousOnly &&
+                    !_quoteService.filterShortOnly) ...[
                   _buildSpecialCategoryCard(
                     context,
                     icon: Icons.star,
                     title: l10n.get('category_famous'),
                     description: l10n.get('category_famous_desc'),
                     count: _quoteService.famousQuotesCount,
-                    isSelected: _selectedCategory == QuoteService.categoryFamous,
+                    isSelected:
+                        _selectedCategory == QuoteService.categoryFamous,
                     onTap: () async {
                       await _quoteService
                           .setSelectedCategory(QuoteService.categoryFamous);
@@ -201,7 +203,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     // 전체 선택 (필터 해제)
                     ChoiceChip(
-                      label: Text('${l10n.get('all_categories')} (${_quoteService.getFilteredCountForCategory(null)})'),
+                      label: Text(
+                          '${l10n.get('all_categories')} (${_quoteService.getFilteredCountForCategory(null)})'),
                       selected: _selectedCategory == null,
                       onSelected: (selected) async {
                         await _quoteService.setSelectedCategory(null);
@@ -215,20 +218,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     // 각 카테고리
                     ...categories.map((category) {
-                      final count = _quoteService.getFilteredCountForCategory(category);
+                      final count =
+                          _quoteService.getFilteredCountForCategory(category);
                       return ChoiceChip(
                         label: Text('${l10n.getCategory(category)} ($count)'),
                         selected: _selectedCategory?.toLowerCase() ==
                             category.toLowerCase(),
-                        onSelected: count > 0 ? (selected) async {
-                          await _quoteService.setSelectedCategory(category);
-                          setState(() {
-                            _selectedCategory = category;
-                            _currentQuote = _quoteService.getDailyQuote();
-                            _showDailyQuote = true;
-                          });
-                          Navigator.pop(context);
-                        } : null,
+                        onSelected: count > 0
+                            ? (selected) async {
+                                await _quoteService
+                                    .setSelectedCategory(category);
+                                setState(() {
+                                  _selectedCategory = category;
+                                  _currentQuote = _quoteService.getDailyQuote();
+                                  _showDailyQuote = true;
+                                });
+                                Navigator.pop(context);
+                              }
+                            : null,
                       );
                     }),
                   ],
@@ -241,10 +248,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  
-  Widget _buildFilterToggleSection(BuildContext context, AppLocalizations l10n, StateSetter setModalState) {
+
+  Widget _buildFilterToggleSection(
+      BuildContext context, AppLocalizations l10n, StateSetter setModalState) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Card(
       color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
       child: Padding(
@@ -297,10 +305,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               },
             ),
-            if (_quoteService.filterFamousOnly || _quoteService.filterShortOnly) ...[
+            if (_quoteService.filterFamousOnly ||
+                _quoteService.filterShortOnly) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
@@ -308,7 +318,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.info_outline, size: 16, color: colorScheme.onPrimaryContainer),
+                    Icon(Icons.info_outline,
+                        size: 16, color: colorScheme.onPrimaryContainer),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -328,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  
+
   Widget _buildFilterToggle(
     BuildContext context, {
     required IconData icon,
@@ -338,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required ValueChanged<bool> onChanged,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return InkWell(
       onTap: () => onChanged(!value),
       borderRadius: BorderRadius.circular(8),
@@ -356,7 +367,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: value ? colorScheme.primary : colorScheme.onSurface,
+                      color:
+                          value ? colorScheme.primary : colorScheme.onSurface,
                       fontWeight: value ? FontWeight.w600 : FontWeight.normal,
                     ),
               ),

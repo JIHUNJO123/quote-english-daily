@@ -127,7 +127,7 @@ class AppLocalizations {
       'category_famous_desc': 'Einstein, Gandhi, Steve Jobs, Mark Twain...',
       'category_short': '⚡ Short & Impactful',
       'category_short_desc': 'Quotes under 100 characters',
-      
+
       // Additional Filters
       'additional_filters': 'Additional Filters',
       'filter_famous_only': 'Famous authors only',
@@ -224,7 +224,7 @@ class AppLocalizations {
       'category_famous_desc': '아인슈타인, 간디, 스티브 잡스, 마크 트웨인...',
       'category_short': '⚡ 짧고 임팩트 있는',
       'category_short_desc': '100자 이하의 명언',
-      
+
       // Additional Filters
       'additional_filters': '추가 필터',
       'filter_famous_only': '유명인 명언만',
@@ -314,13 +314,13 @@ class AppLocalizations {
       'category_famous_desc': 'アインシュタイン、ガンジー、スティーブ・ジョブズ...',
       'category_short': '⚡ 短くてインパクトのある',
       'category_short_desc': '100文字以下の名言',
-      
+
       // Additional Filters
       'additional_filters': '追加フィルター',
       'filter_famous_only': '有名人の名言のみ',
       'filter_short_only': '短い名言のみ（100文字以下）',
       'filtered_quotes_count': 'フィルター後の名言数',
-      
+
       'no_favorites': 'お気に入りの名言がありません',
       'add_favorites_hint': '好きな名言のハートをタップしてください',
       'share': '共有',
@@ -395,13 +395,13 @@ class AppLocalizations {
       'category_famous_desc': '爱因斯坦、甘地、乔布斯、马克吐温...',
       'category_short': '⚡ 短小精悍',
       'category_short_desc': '100字以内的名言',
-      
+
       // Additional Filters
       'additional_filters': '附加筛选',
       'filter_famous_only': '仅显示名人名言',
       'filter_short_only': '仅显示短名言（100字以内）',
       'filtered_quotes_count': '筛选后名言数',
-      
+
       'no_favorites': '还没有收藏的名言',
       'add_favorites_hint': '点击喜欢的名言的心形图标',
       'share': '分享',
