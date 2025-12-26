@@ -1,9 +1,9 @@
 name: daily_quotes
-description: QuoteSpace - Get inspired with quotes in your language every day.
+description: English Quote 27000 - Learn English with 27000 inspiring quotes.
 
 publish_to: 'none'
 
-version: 1.0.1+11
+version: 1.0.3+13
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -41,4 +41,3 @@ flutter:
   
   assets:
     - assets/quotes.json
-    - assets/quotes_translations.json

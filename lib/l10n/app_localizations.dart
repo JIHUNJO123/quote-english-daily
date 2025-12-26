@@ -21,23 +21,24 @@ class AppLocalizations {
   // 앱 시작 시 번역 로드
   static Future<void> initialize(String langCode) async {
     if (_isInitialized && _dynamicTranslations.containsKey(langCode)) return;
-    
+
     // 수동 번역이 있는 언어는 스킵
     if (_localizedValues.containsKey(langCode)) {
       _isInitialized = true;
       return;
     }
-    
+
     // 캐시에서 로드 시도
     final prefs = await SharedPreferences.getInstance();
     final cached = prefs.getString('ui_translations_$langCode');
-    
+
     if (cached != null) {
-      _dynamicTranslations[langCode] = Map<String, String>.from(json.decode(cached));
+      _dynamicTranslations[langCode] =
+          Map<String, String>.from(json.decode(cached));
       _isInitialized = true;
       return;
     }
-    
+
     // API로 번역
     await _translateUIStrings(langCode);
     _isInitialized = true;
@@ -47,7 +48,7 @@ class AppLocalizations {
   static Future<void> _translateUIStrings(String langCode) async {
     final englishStrings = _localizedValues['en']!;
     final translated = <String, String>{};
-    
+
     // 배치로 번역 (API 호출 최소화)
     for (final entry in englishStrings.entries) {
       try {
@@ -57,9 +58,9 @@ class AppLocalizations {
         translated[entry.key] = entry.value; // 실패 시 영어 유지
       }
     }
-    
+
     _dynamicTranslations[langCode] = translated;
-    
+
     // 캐시에 저장
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('ui_translations_$langCode', json.encode(translated));
@@ -68,17 +69,19 @@ class AppLocalizations {
   static Future<String?> _translateText(String text, String targetLang) async {
     try {
       final url = Uri.parse(
-        'https://api.mymemory.translated.net/get?q=${Uri.encodeComponent(text)}&langpair=en|$targetLang'
-      );
-      
+          'https://api.mymemory.translated.net/get?q=${Uri.encodeComponent(text)}&langpair=en|$targetLang');
+
       final response = await http.get(url).timeout(const Duration(seconds: 5));
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final translation = data['responseData']['translatedText'];
-        
-        if (translation != null && 
-            !translation.toString().toUpperCase().contains('MYMEMORY WARNING')) {
+
+        if (translation != null &&
+            !translation
+                .toString()
+                .toUpperCase()
+                .contains('MYMEMORY WARNING')) {
           return translation;
         }
       }
@@ -95,16 +98,17 @@ class AppLocalizations {
       'categories': 'Categories',
       'favorites': 'Favorites',
       'settings': 'Settings',
-      
+
       // Home Screen
       'daily_quote': "Today's Quote",
       'random_quote': 'Random Quote',
       'new_quote': 'New Quote',
       'view_daily_quote': 'View Daily Quote',
       'filter_category': 'Filter by Category',
-      'filter_category_desc': 'Select a category to see quotes only from that topic',
+      'filter_category_desc':
+          'Select a category to see quotes only from that topic',
       'all_categories': 'All Categories',
-      
+
       // Categories
       'happiness': 'Happiness',
       'inspiration': 'Inspiration',
@@ -117,16 +121,28 @@ class AppLocalizations {
       'science': 'Science',
       'time': 'Time',
       'quotes_count': 'quotes',
+
+      // Special Categories
+      'category_famous': '⭐ Famous Authors',
+      'category_famous_desc': 'Einstein, Gandhi, Steve Jobs, Mark Twain...',
+      'category_short': '⚡ Short & Impactful',
+      'category_short_desc': 'Quotes under 100 characters',
       
+      // Additional Filters
+      'additional_filters': 'Additional Filters',
+      'filter_famous_only': 'Famous authors only',
+      'filter_short_only': 'Short quotes only (≤100 chars)',
+      'filtered_quotes_count': 'Matching quotes',
+
       // Favorites
       'no_favorites': 'No favorite quotes yet',
       'add_favorites_hint': 'Tap the heart icon on quotes you love',
-      
+
       // Actions
       'share': 'Share',
       'copy': 'Copy',
       'copied_to_clipboard': 'Copied to clipboard',
-      
+
       // Settings
       'notifications': 'Notifications',
       'daily_notification': 'Daily Quote Notification',
@@ -143,38 +159,36 @@ class AppLocalizations {
       'version': 'Version',
       'quote_data': 'Quote Data',
       'quotes_available': 'quotes available',
-      
+
       // Translation
       'translation': 'Translation',
       'show_translation': 'Show Translation',
-      'hide_translation': 'Hide Translation',
       'translating': 'Translating...',
-      'auto_translate': 'Auto Translate',
-      'auto_translate_desc': 'Automatically translate quotes to your language',
-      'notification_web_unavailable': 'Notifications are only available on mobile devices',
-      
+      'notification_web_unavailable':
+          'Notifications are only available on mobile devices',
+
       // IAP
       'premium': 'Premium',
       'remove_ads': 'Remove Ads',
       'remove_ads_desc': 'Enjoy ad-free experience',
       'restore_purchases': 'Restore Purchases',
-      'restore_purchases_desc': 'Restore previous purchases on this device or after reinstalling the app',
+      'restore_purchases_desc':
+          'Restore previous purchases on this device or after reinstalling the app',
       'purchase_success': 'Purchase successful! Ads removed.',
       'purchase_failed': 'Purchase failed. Please try again.',
       'already_premium': 'You already have premium!',
       'restoring': 'Restoring purchases...',
-      
+
       // Rewarded Ads
-      'watch_ad_for_reward': 'Watch Ad for 10 Free Quotes',
-      'reward_received': 'You received {amount} free quotes!',
-      'rewarded_quotes_available': '{count} free quotes available',
-      
-      // Language
-      'language': 'Language',
-      'app_language': 'App Language',
-      'select_language': 'Select Language',
-      'language_changed_restart': 'Language changed. Please restart the app.',
-      'restart_app': 'Restart',
+      'watch_ad_for_reward': 'Watch Ad for More Quotes',
+      'reward_received': '+{amount} quotes received!',
+      'rewarded_quotes_available': '{count} bonus quotes available',
+
+      // Unlock
+      'locked_quote': 'Locked Quote',
+      'watch_ad_unlock': 'Watch ad to unlock all quotes until midnight',
+      'unlocked_until_midnight': 'Free until midnight!',
+      'tap_to_unlock': 'Tap to unlock',
     },
     'ko': {
       // Navigation
@@ -182,7 +196,7 @@ class AppLocalizations {
       'categories': '카테고리',
       'favorites': '즐겨찾기',
       'settings': '설정',
-      
+
       // Home Screen
       'daily_quote': '오늘의 명언',
       'random_quote': '랜덤 명언',
@@ -191,7 +205,7 @@ class AppLocalizations {
       'filter_category': '카테고리 필터',
       'filter_category_desc': '원하는 주제의 명언만 볼 수 있습니다',
       'all_categories': '전체 카테고리',
-      
+
       // Categories
       'happiness': '행복',
       'inspiration': '영감',
@@ -204,16 +218,28 @@ class AppLocalizations {
       'science': '과학',
       'time': '시간',
       'quotes_count': '개의 명언',
+
+      // Special Categories
+      'category_famous': '⭐ 유명인 명언',
+      'category_famous_desc': '아인슈타인, 간디, 스티브 잡스, 마크 트웨인...',
+      'category_short': '⚡ 짧고 임팩트 있는',
+      'category_short_desc': '100자 이하의 명언',
       
+      // Additional Filters
+      'additional_filters': '추가 필터',
+      'filter_famous_only': '유명인 명언만',
+      'filter_short_only': '짧은 명언만 (100자 이하)',
+      'filtered_quotes_count': '필터된 명언 수',
+
       // Favorites
       'no_favorites': '즐겨찾기한 명언이 없습니다',
       'add_favorites_hint': '마음에 드는 명언에 하트를 눌러보세요',
-      
+
       // Actions
       'share': '공유',
       'copy': '복사',
       'copied_to_clipboard': '클립보드에 복사되었습니다',
-      
+
       // Settings
       'notifications': '알림',
       'daily_notification': '매일 명언 알림',
@@ -230,16 +256,13 @@ class AppLocalizations {
       'version': '버전',
       'quote_data': '명언 데이터',
       'quotes_available': '개의 명언',
-      
+
       // Translation
       'translation': '번역',
       'show_translation': '번역 보기',
-      'hide_translation': '번역 숨기기',
       'translating': '번역 중...',
-      'auto_translate': '자동 번역',
-      'auto_translate_desc': '명언을 자동으로 번역하여 표시합니다',
       'notification_web_unavailable': '알림은 모바일 기기에서만 사용 가능합니다',
-      
+
       // IAP
       'premium': '프리미엄',
       'remove_ads': '광고 제거',
@@ -250,18 +273,17 @@ class AppLocalizations {
       'purchase_failed': '구매 실패. 다시 시도해주세요.',
       'already_premium': '이미 프리미엄 사용자입니다!',
       'restoring': '구매 복원 중...',
-      
+
       // Rewarded Ads
-      'watch_ad_for_reward': '광고 시청하고 명언 10개 받기',
-      'reward_received': '명언 {amount}개를 받았습니다!',
-      'rewarded_quotes_available': '무료 명언 {count}개 사용 가능',
-      
-      // Language
-      'language': '언어',
-      'app_language': '앱 언어',
-      'select_language': '언어 선택',
-      'language_changed_restart': '언어가 변경되었습니다. 앱을 재시작해주세요.',
-      'restart_app': '재시작',
+      'watch_ad_for_reward': '광고 보고 명언 더 받기',
+      'reward_received': '+{amount}개 명언 획득!',
+      'rewarded_quotes_available': '보너스 명언 {count}개 사용 가능',
+
+      // Unlock
+      'locked_quote': '잠긴 명언',
+      'watch_ad_unlock': '광고를 보고 자정까지 모든 명언 무료로 보기',
+      'unlocked_until_midnight': '자정까지 무료!',
+      'tap_to_unlock': '탭하여 잠금 해제',
     },
     'ja': {
       'home': 'ホーム',
@@ -286,6 +308,19 @@ class AppLocalizations {
       'science': '科学',
       'time': '時間',
       'quotes_count': '件の名言',
+
+      // Special Categories
+      'category_famous': '⭐ 有名人の名言',
+      'category_famous_desc': 'アインシュタイン、ガンジー、スティーブ・ジョブズ...',
+      'category_short': '⚡ 短くてインパクトのある',
+      'category_short_desc': '100文字以下の名言',
+      
+      // Additional Filters
+      'additional_filters': '追加フィルター',
+      'filter_famous_only': '有名人の名言のみ',
+      'filter_short_only': '短い名言のみ（100文字以下）',
+      'filtered_quotes_count': 'フィルター後の名言数',
+      
       'no_favorites': 'お気に入りの名言がありません',
       'add_favorites_hint': '好きな名言のハートをタップしてください',
       'share': '共有',
@@ -308,10 +343,7 @@ class AppLocalizations {
       'quotes_available': '件の名言',
       'translation': '翻訳',
       'show_translation': '翻訳を表示',
-      'hide_translation': '翻訳を非表示',
       'translating': '翻訳中...',
-      'auto_translate': '自動翻訳',
-      'auto_translate_desc': '名言を自動的に翻訳して表示します',
       'notification_web_unavailable': '通知はモバイル端末でのみ利用可能です',
       'premium': 'プレミアム',
       'remove_ads': '広告を削除',
@@ -322,18 +354,17 @@ class AppLocalizations {
       'purchase_failed': '購入に失敗しました。もう一度お試しください。',
       'already_premium': 'すでにプレミアムです！',
       'restoring': '購入を復元中...',
-      
+
       // Rewarded Ads
-      'watch_ad_for_reward': '広告を見て名言10個を獲得',
-      'reward_received': '名言{amount}個を獲得しました！',
-      'rewarded_quotes_available': '無料名言{count}個利用可能',
-      
-      // Language
-      'language': '言語',
-      'app_language': 'アプリ言語',
-      'select_language': '言語を選択',
-      'language_changed_restart': '言語が変更されました。アプリを再起動してください。',
-      'restart_app': '再起動',
+      'watch_ad_for_reward': '広告を見てもっと名言をもらう',
+      'reward_received': '+{amount}件の名言を獲得！',
+      'rewarded_quotes_available': 'ボーナス名言{count}件利用可能',
+
+      // Unlock
+      'locked_quote': 'ロックされた名言',
+      'watch_ad_unlock': '広告を見て深夜まで全ての名言を無料で',
+      'unlocked_until_midnight': '深夜まで無料！',
+      'tap_to_unlock': 'タップして解除',
     },
     'zh': {
       'home': '首页',
@@ -358,6 +389,19 @@ class AppLocalizations {
       'science': '科学',
       'time': '时间',
       'quotes_count': '条名言',
+
+      // Special Categories
+      'category_famous': '⭐ 名人名言',
+      'category_famous_desc': '爱因斯坦、甘地、乔布斯、马克吐温...',
+      'category_short': '⚡ 短小精悍',
+      'category_short_desc': '100字以内的名言',
+      
+      // Additional Filters
+      'additional_filters': '附加筛选',
+      'filter_famous_only': '仅显示名人名言',
+      'filter_short_only': '仅显示短名言（100字以内）',
+      'filtered_quotes_count': '筛选后名言数',
+      
       'no_favorites': '还没有收藏的名言',
       'add_favorites_hint': '点击喜欢的名言的心形图标',
       'share': '分享',
@@ -380,10 +424,7 @@ class AppLocalizations {
       'quotes_available': '条名言',
       'translation': '翻译',
       'show_translation': '显示翻译',
-      'hide_translation': '隐藏翻译',
       'translating': '翻译中...',
-      'auto_translate': '自动翻译',
-      'auto_translate_desc': '自动将名言翻译为您的语言',
       'notification_web_unavailable': '通知仅在移动设备上可用',
       'premium': '高级版',
       'remove_ads': '移除广告',
@@ -394,18 +435,17 @@ class AppLocalizations {
       'purchase_failed': '购买失败，请重试。',
       'already_premium': '您已经是高级用户！',
       'restoring': '正在恢复购买...',
-      
+
       // Rewarded Ads
-      'watch_ad_for_reward': '观看广告获得10条免费名言',
-      'reward_received': '您获得了{amount}条免费名言！',
-      'rewarded_quotes_available': '还有{count}条免费名言可用',
-      
-      // Language
-      'language': '语言',
-      'app_language': '应用语言',
-      'select_language': '选择语言',
-      'language_changed_restart': '语言已更改。请重启应用。',
-      'restart_app': '重启',
+      'watch_ad_for_reward': '看广告获取更多名言',
+      'reward_received': '+{amount}条名言已获得！',
+      'rewarded_quotes_available': '可用奖励名言{count}条',
+
+      // Unlock
+      'locked_quote': '已锁定的名言',
+      'watch_ad_unlock': '看广告免费解锁所有名言直到午夜',
+      'unlocked_until_midnight': '午夜前免费！',
+      'tap_to_unlock': '点击解锁',
     },
     'es': {
       'home': 'Inicio',
@@ -445,11 +485,9 @@ class AppLocalizations {
       'quotes_available': 'citas disponibles',
       'translation': 'Traducción',
       'show_translation': 'Mostrar traducción',
-      'hide_translation': 'Ocultar traducción',
       'translating': 'Traduciendo...',
-      'auto_translate': 'Traducción automática',
-      'auto_translate_desc': 'Traducir automáticamente las citas a su idioma',
-      'notification_web_unavailable': 'Las notificaciones solo están disponibles en dispositivos móviles',
+      'notification_web_unavailable':
+          'Las notificaciones solo están disponibles en dispositivos móviles',
       'premium': 'Premium',
       'remove_ads': 'Eliminar anuncios',
       'remove_ads_desc': 'Disfruta sin anuncios',
@@ -458,43 +496,38 @@ class AppLocalizations {
       'purchase_failed': 'Compra fallida. Inténtalo de nuevo.',
       'already_premium': '¡Ya tienes premium!',
       'restoring': 'Restaurando compras...',
-      
-      // Rewarded Ads
-      'watch_ad_for_reward': 'Ver anuncio para 10 citas gratis',
-      'reward_received': '¡Recibiste {amount} citas gratis!',
-      'rewarded_quotes_available': '{count} citas gratis disponibles',
-      
-      // Language
-      'language': 'Idioma',
-      'app_language': 'Idioma de la app',
-      'select_language': 'Seleccionar idioma',
-      'language_changed_restart': 'Idioma cambiado. Por favor reinicia la app.',
-      'restart_app': 'Reiniciar',
     },
   };
 
   String get(String key) {
     final langCode = locale.languageCode;
-    
+
     // 1. 수동 번역 확인
     if (_localizedValues.containsKey(langCode)) {
-      return _localizedValues[langCode]?[key] ?? 
-             _localizedValues['en']?[key] ?? 
-             key;
+      return _localizedValues[langCode]?[key] ??
+          _localizedValues['en']?[key] ??
+          key;
     }
-    
+
     // 2. 동적 번역 확인
     if (_dynamicTranslations.containsKey(langCode)) {
-      return _dynamicTranslations[langCode]?[key] ?? 
-             _localizedValues['en']?[key] ?? 
-             key;
+      return _dynamicTranslations[langCode]?[key] ??
+          _localizedValues['en']?[key] ??
+          key;
     }
-    
+
     // 3. 기본값 (영어)
     return _localizedValues['en']?[key] ?? key;
   }
 
   String getCategory(String category) {
+    // 특수 카테고리 처리
+    if (category == '_FAMOUS_') {
+      return get('category_famous');
+    }
+    if (category == '_SHORT_') {
+      return get('category_short');
+    }
     return get(category.toLowerCase());
   }
 
@@ -504,37 +537,158 @@ class AppLocalizations {
   }
 
   // 수동 번역된 언어
-  static List<String> get manuallyTranslatedLanguages => ['en', 'ko', 'ja', 'zh', 'es'];
-  
+  static List<String> get manuallyTranslatedLanguages =>
+      ['en', 'ko', 'ja', 'zh', 'es'];
+
   // 모든 지원 언어 코드
   static List<String> get _allLanguageCodes => _languageNames.keys.toList();
-  
+
   static List<String> get supportedLanguageCodes => _allLanguageCodes;
 
-  // 주요 언어 6개 + 영어 (GPT-4o mini로 미리 번역된 언어)
+  // 전 세계 175개국 언어 이름 (각 언어의 모국어 표기)
   static const Map<String, String> _languageNames = {
+    // 주요 언어
     'en': 'English',
     'ko': '한국어',
     'ja': '日本語',
     'zh': '中文',
     'es': 'Español',
+
+    // 유럽 언어
+    'de': 'Deutsch',
     'fr': 'Français',
+    'it': 'Italiano',
     'pt': 'Português',
+    'ru': 'Русский',
+    'pl': 'Polski',
+    'nl': 'Nederlands',
+    'sv': 'Svenska',
+    'no': 'Norsk',
+    'da': 'Dansk',
+    'fi': 'Suomi',
+    'el': 'Ελληνικά',
+    'cs': 'Čeština',
+    'sk': 'Slovenčina',
+    'hu': 'Magyar',
+    'ro': 'Română',
+    'bg': 'Български',
+    'hr': 'Hrvatski',
+    'sr': 'Српски',
+    'sl': 'Slovenščina',
+    'uk': 'Українська',
+    'be': 'Беларуская',
+    'lt': 'Lietuvių',
+    'lv': 'Latviešu',
+    'et': 'Eesti',
+    'is': 'Íslenska',
+    'ga': 'Gaeilge',
+    'cy': 'Cymraeg',
+    'mt': 'Malti',
+    'lb': 'Lëtzebuergesch',
+    'mk': 'Македонски',
+    'sq': 'Shqip',
+    'bs': 'Bosanski',
+    'ca': 'Català',
+    'gl': 'Galego',
+    'eu': 'Euskara',
+
+    // 아시아 언어
+    'hi': 'हिन्दी',
+    'bn': 'বাংলা',
+    'pa': 'ਪੰਜਾਬੀ',
+    'gu': 'ગુજરાતી',
+    'mr': 'मराठी',
+    'ta': 'தமிழ்',
+    'te': 'తెలుగు',
+    'kn': 'ಕನ್ನಡ',
+    'ml': 'മലയാളം',
+    'or': 'ଓଡ଼ିଆ',
+    'as': 'অসমীয়া',
+    'ne': 'नेपाली',
+    'si': 'සිංහල',
+    'th': 'ไทย',
+    'vi': 'Tiếng Việt',
+    'id': 'Bahasa Indonesia',
+    'ms': 'Bahasa Melayu',
+    'tl': 'Tagalog',
+    'my': 'မြန်မာဘာသာ',
+    'km': 'ភាសាខ្មែរ',
+    'lo': 'ລາວ',
+    'mn': 'Монгол',
+    'bo': 'བོད་སྐད།',
+    'dz': 'རྫོང་ཁ།',
+    'ka': 'ქართული',
+    'hy': 'Հայdelays',
+    'az': 'Azərbaycan',
+    'kk': 'Қазақша',
+    'ky': 'Кыргызча',
+    'uz': 'Oʻzbekcha',
+    'tk': 'Türkmençe',
+    'tg': 'Тоҷикӣ',
+
+    // 중동/아랍 언어
+    'ar': 'العربية',
+    'fa': 'فارسی',
+    'he': 'עברית',
+    'tr': 'Türkçe',
+    'ur': 'اردو',
+    'ps': 'پښتو',
+    'ku': 'Kurdî',
+
+    // 아프리카 언어
+    'sw': 'Kiswahili',
+    'am': 'አማርኛ',
+    'ha': 'Hausa',
+    'yo': 'Yorùbá',
+    'ig': 'Igbo',
+    'zu': 'isiZulu',
+    'xh': 'isiXhosa',
+    'af': 'Afrikaans',
+    'so': 'Soomaali',
+    'rw': 'Kinyarwanda',
+    'mg': 'Malagasy',
+    'sn': 'chiShona',
+    'ny': 'Chichewa',
+    'lg': 'Luganda',
+    'wo': 'Wolof',
+
+    // 태평양/오세아니아
+    'mi': 'Te Reo Māori',
+    'sm': 'Gagana Samoa',
+    'to': 'Lea Fakatonga',
+    'fj': 'Na Vosa Vakaviti',
+    'haw': 'ʻŌlelo Hawaiʻi',
+
+    // 기타
+    'eo': 'Esperanto',
+    'la': 'Latina',
+    'jv': 'Basa Jawa',
+    'su': 'Basa Sunda',
+    'ceb': 'Cebuano',
+    'ht': 'Kreyòl Ayisyen',
+    'yi': 'ייִדיש',
+    'fy': 'Frysk',
+    'gd': 'Gàidhlig',
+    'co': 'Corsu',
+    'oc': 'Occitan',
+    'br': 'Brezhoneg',
   };
 
   String get languageName {
-    return _languageNames[locale.languageCode] ?? 
-           _languageNames['en'] ?? 
-           locale.languageCode.toUpperCase();
+    return _languageNames[locale.languageCode] ??
+        _languageNames['en'] ??
+        locale.languageCode.toUpperCase();
   }
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) {
-    return AppLocalizations.supportedLanguageCodes.contains(locale.languageCode);
+    return AppLocalizations.supportedLanguageCodes
+        .contains(locale.languageCode);
   }
 
   @override

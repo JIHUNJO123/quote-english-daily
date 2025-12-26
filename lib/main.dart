@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:ui' as ui;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home_screen.dart';
 import 'screens/category_screen.dart';
 import 'screens/favorites_screen.dart';
@@ -13,34 +12,27 @@ import 'services/iap_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 웹이 아닌 경우에만 광고 및 IAP 초기화
   if (!kIsWeb) {
     await AdService().initialize();
     await IAPService().initialize();
   }
-  
-  // 저장된 언어 설정 로드 또는 시스템 언어 사용
-  final prefs = await SharedPreferences.getInstance();
-  final savedLanguage = prefs.getString('selected_language');
+
+  // 시스템 언어 감지 및 UI 번역 초기화
   final systemLocale = ui.PlatformDispatcher.instance.locale;
-  final targetLanguage = savedLanguage ?? systemLocale.languageCode;
-  
-  // UI 번역 초기화
-  await AppLocalizations.initialize(targetLanguage);
-  
-  runApp(DailyQuotesApp(locale: savedLanguage != null ? Locale(savedLanguage) : null));
+  await AppLocalizations.initialize(systemLocale.languageCode);
+
+  runApp(const DailyQuotesApp());
 }
 
 class DailyQuotesApp extends StatelessWidget {
-  final Locale? locale;
-  
-  const DailyQuotesApp({super.key, this.locale});
+  const DailyQuotesApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'QuoteSpace',
+      title: 'English Quote 27000',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -57,7 +49,7 @@ class DailyQuotesApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
-      
+
       // 다국어 지원
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -66,8 +58,7 @@ class DailyQuotesApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: locale,
-      
+
       home: const MainNavigator(),
     );
   }
@@ -93,7 +84,7 @@ class _MainNavigatorState extends State<MainNavigator> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: NavigationBar(

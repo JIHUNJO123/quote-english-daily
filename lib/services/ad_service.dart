@@ -8,18 +8,32 @@ class AdService {
   factory AdService() => _instance;
   AdService._internal();
 
-  BannerAd? _bannerAd;
-  InterstitialAd? _interstitialAd;
   RewardedAd? _rewardedAd;
   bool _isInitialized = false;
   bool _isPremium = false;
-  
+  bool _isLoading = false;
+  DateTime? _unlockedUntil; // 잠금 해제 시간
+
   // 보상형 광고 콜백
   Function(int rewardAmount, String rewardType)? _onRewarded;
 
   // 프리미엄 상태 확인
   bool get isPremium => _isPremium;
-  
+
+  // 잠금 해제 상태 확인 (자정까지 무료)
+  bool get isUnlocked {
+    if (_isPremium) return true;
+    if (_unlockedUntil == null) return false;
+    return DateTime.now().isBefore(_unlockedUntil!);
+  }
+
+  // 자정까지 남은 시간
+  Duration get timeUntilLock {
+    if (_unlockedUntil == null) return Duration.zero;
+    final remaining = _unlockedUntil!.difference(DateTime.now());
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
   // 프리미엄 상태 설정 (IAP에서 호출)
   set isPremium(bool value) {
     _isPremium = value;
@@ -29,6 +43,16 @@ class AdService {
   Future<void> _loadPremiumStatus() async {
     final prefs = await SharedPreferences.getInstance();
     _isPremium = prefs.getBool('is_premium') ?? false;
+
+    // 잠금 해제 시간 로드
+    final unlockTime = prefs.getInt('unlocked_until');
+    if (unlockTime != null) {
+      _unlockedUntil = DateTime.fromMillisecondsSinceEpoch(unlockTime);
+      // 이미 지났으면 null로
+      if (_unlockedUntil!.isBefore(DateTime.now())) {
+        _unlockedUntil = null;
+      }
+    }
   }
 
   Future<void> _savePremiumStatus(bool value) async {
@@ -36,46 +60,37 @@ class AdService {
     await prefs.setBool('is_premium', value);
   }
 
-  // 실제 광고 ID
-  static String get bannerAdUnitId {
-    if (kIsWeb) return ''; // 웹은 지원 안함
-    if (Platform.isAndroid) {
-      return 'ca-app-pub-5837885590326347/9922573116'; // Android 배너
-    } else if (Platform.isIOS) {
-      return 'ca-app-pub-5837885590326347/7915179264'; // iOS 배너
-    }
-    return '';
+  // 자정까지 잠금 해제
+  Future<void> unlockUntilMidnight() async {
+    final now = DateTime.now();
+    _unlockedUntil = DateTime(now.year, now.month, now.day + 1); // 다음날 자정
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+        'unlocked_until', _unlockedUntil!.millisecondsSinceEpoch);
   }
 
-  static String get interstitialAdUnitId {
-    if (kIsWeb) return '';
-    if (Platform.isAndroid) {
-      return 'ca-app-pub-5837885590326347/5847596734'; // Android 전면
-    } else if (Platform.isIOS) {
-      return 'ca-app-pub-5837885590326347/3664286522'; // iOS 전면
-    }
-    return '';
-  }
-
+  // 보상형 광고 ID
   static String get rewardedAdUnitId {
     if (kIsWeb) return '';
     if (Platform.isAndroid) {
-      return 'ca-app-pub-5837885590326347/6752195239'; // Android 보상형 전면
+      return 'ca-app-pub-5837885590326347/5443214505'; // Android 보상형
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-5837885590326347/8065276902'; // iOS 보상형 전면
+      return 'ca-app-pub-5837885590326347/5443214505'; // iOS 보상형 (같은 ID 사용, 필요시 변경)
     }
     return '';
   }
 
   // 플랫폼이 광고를 지원하는지 확인 (프리미엄이면 광고 안 보임)
-  static bool get isSupported => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+  static bool get isSupported =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
   bool get shouldShowAds => isSupported && !_isPremium;
 
   Future<void> initialize() async {
     if (!isSupported || _isInitialized) return;
 
     await _loadPremiumStatus();
-    
+
     if (_isPremium) {
       _isInitialized = true;
       return; // 프리미엄 사용자는 광고 로드 안함
@@ -83,62 +98,17 @@ class AdService {
 
     await MobileAds.instance.initialize();
     _isInitialized = true;
-    
+
     // 보상형 광고 미리 로드
     await loadRewardedAd();
   }
 
-  // 배너 광고 로드
-  Future<void> loadBannerAd() async {
-    if (!shouldShowAds) return;
-
-    _bannerAd = BannerAd(
-      adUnitId: bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          print('배너 광고 로드됨');
-        },
-        onAdFailedToLoad: (ad, error) {
-          print('배너 광고 로드 실패: $error');
-          ad.dispose();
-          _bannerAd = null;
-        },
-      ),
-    );
-
-    await _bannerAd?.load();
-  }
-
-  // 전면 광고 로드
-  Future<void> loadInterstitialAd() async {
-    if (!shouldShowAds) return;
-
-    await InterstitialAd.load(
-      adUnitId: interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          _interstitialAd = ad;
-          print('전면 광고 로드됨');
-        },
-        onAdFailedToLoad: (error) {
-          print('전면 광고 로드 실패: $error');
-          _interstitialAd = null;
-        },
-      ),
-    );
-  }
-
-  // 배너 광고 가져오기
-  BannerAd? get bannerAd => _bannerAd;
-
-  // 더 이상 사용하지 않음 (보상형 광고로 대체)
-
   // 보상형 광고 로드
   Future<void> loadRewardedAd() async {
     if (!shouldShowAds) return;
+    if (_isLoading || _rewardedAd != null) return;
+
+    _isLoading = true;
 
     await RewardedAd.load(
       adUnitId: rewardedAdUnitId,
@@ -146,15 +116,20 @@ class AdService {
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
           _rewardedAd = ad;
+          _isLoading = false;
           print('보상형 광고 로드됨');
         },
         onAdFailedToLoad: (error) {
           print('보상형 광고 로드 실패: $error');
           _rewardedAd = null;
+          _isLoading = false;
         },
       ),
     );
   }
+
+  // 보상형 광고 준비 여부 확인
+  bool get isRewardedAdReady => _rewardedAd != null;
 
   // 보상형 광고 표시
   Future<void> showRewardedAd({
@@ -165,7 +140,7 @@ class AdService {
       onRewarded(10, 'quotes');
       return;
     }
-    
+
     if (_rewardedAd == null) {
       await loadRewardedAd();
       if (_rewardedAd == null) {
@@ -180,10 +155,12 @@ class AdService {
     _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
+        _rewardedAd = null;
         loadRewardedAd(); // 다음 광고 미리 로드
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
         ad.dispose();
+        _rewardedAd = null;
         loadRewardedAd();
         // 실패 시에도 작은 보상 제공
         if (_onRewarded != null) {
@@ -204,12 +181,7 @@ class AdService {
     _onRewarded = null;
   }
 
-  // 보상형 광고 준비 여부 확인
-  bool get isRewardedAdReady => _rewardedAd != null;
-
   void dispose() {
-    _bannerAd?.dispose();
-    _interstitialAd?.dispose();
     _rewardedAd?.dispose();
   }
 }

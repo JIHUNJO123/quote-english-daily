@@ -1,11 +1,11 @@
 {
-    "name": "QuoteSpace",
-    "short_name": "QuoteSpace",
+    "name": "daily_quotes",
+    "short_name": "daily_quotes",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Get inspired with quotes in your language every day.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
