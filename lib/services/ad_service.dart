@@ -8,7 +8,7 @@ class AdService {
   factory AdService() => _instance;
   AdService._internal();
 
-  RewardedAd? _rewardedAd;
+  RewardedInterstitialAd? _rewardedAd;
   bool _isInitialized = false;
   bool _isPremium = false;
   bool _isLoading = false;
@@ -70,13 +70,13 @@ class AdService {
         'unlocked_until', _unlockedUntil!.millisecondsSinceEpoch);
   }
 
-  // 보상형 광고 ID
+  // 보상형 광고 ID (Rewarded Interstitial)
   static String get rewardedAdUnitId {
     if (kIsWeb) return '';
     if (Platform.isAndroid) {
-      return 'ca-app-pub-5837885590326347/5443214505'; // Android 보상형
+      return 'ca-app-pub-5837885590326347/5844122459'; // Android 보상형 전면 광고
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-5837885590326347/5443214505'; // iOS 보상형 (같은 ID 사용, 필요시 변경)
+      return 'ca-app-pub-5837885590326347/5443214505'; // iOS 보상형 전면 광고
     }
     return '';
   }
@@ -110,17 +110,17 @@ class AdService {
 
     _isLoading = true;
 
-    await RewardedAd.load(
+    await RewardedInterstitialAd.load(
       adUnitId: rewardedAdUnitId,
       request: const AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
+      rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           _rewardedAd = ad;
           _isLoading = false;
-          print('보상형 광고 로드됨');
+          print('보상형 전면 광고 로드됨');
         },
         onAdFailedToLoad: (error) {
-          print('보상형 광고 로드 실패: $error');
+          print('보상형 전면 광고 로드 실패: $error');
           _rewardedAd = null;
           _isLoading = false;
         },
